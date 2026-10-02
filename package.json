@@ -1,0 +1,14 @@
+{
+  "name": "catering-system-full-project",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Runs the backend and frontend together with one command.",
+  "scripts": {
+    "dev": "concurrently -n BACKEND,FRONTEND -c blue,green \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && mvn spring-boot:run",
+    "frontend": "cd frontend && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
