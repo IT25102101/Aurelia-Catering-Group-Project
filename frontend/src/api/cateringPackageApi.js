@@ -1,0 +1,55 @@
+import { API_BASE_URL } from "./config";
+
+/**
+ * All the fetch calls for "6.3 Catering Package Management" live in this one file.
+ * This matches the backend's CateringPackageController.java one-to-one:
+ * every function here calls exactly one endpoint on that controller.
+ *
+ * Every function returns a Promise — use it with async/await in a
+ * component, e.g.:
+ *   const data = await getCateringPackages();
+ */
+
+const BASE = `${API_BASE_URL}/catering-packages`;
+
+// READ (all)
+export async function getCateringPackages() {
+  const response = await fetch(BASE);
+  if (!response.ok) throw new Error("Failed to fetch catering-packages");
+  return response.json();
+}
+
+// READ (one, by id)
+export async function getCateringPackageById(id) {
+  const response = await fetch(`${BASE}/${id}`);
+  if (!response.ok) throw new Error(`Failed to fetch CateringPackage with id ${id}`);
+  return response.json();
+}
+
+// CREATE
+export async function createCateringPackage(cateringPackageData) {
+  const response = await fetch(BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cateringPackageData),
+  });
+  if (!response.ok) throw new Error("Failed to create CateringPackage");
+  return response.json();
+}
+
+// UPDATE
+export async function updateCateringPackage(id, cateringPackageData) {
+  const response = await fetch(`${BASE}/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cateringPackageData),
+  });
+  if (!response.ok) throw new Error(`Failed to update CateringPackage with id ${id}`);
+  return response.json();
+}
+
+// DELETE
+export async function deleteCateringPackage(id) {
+  const response = await fetch(`${BASE}/${id}`, { method: "DELETE" });
+  if (!response.ok) throw new Error(`Failed to delete CateringPackage with id ${id}`);
+}
