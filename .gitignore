@@ -134,3 +134,75 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# =========================
+# JetBrains (IntelliJ, WebStorm, PyCharm, etc.)
+# =========================
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+cmake-build-*/
+
+# =========================
+# Visual Studio Code
+# =========================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+.history/
+
+# =========================
+# Visual Studio
+# =========================
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# =========================
+# Eclipse
+# =========================
+.project
+.classpath
+.settings/
+bin/
+
+# =========================
+# NetBeans
+# =========================
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbproject/load-impl.xml
+
+# =========================
+# Sublime Text
+# =========================
+*.sublime-workspace
+*.sublime-project
+
+# =========================
+# Vim & Emacs
+# =========================
+# Vim swap & backup files
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+*.bak
+*~
+
+# Emacs auto-save & lock files
+\#*#
+.#*
+
+# Maven build directory
+target/
+*.class
