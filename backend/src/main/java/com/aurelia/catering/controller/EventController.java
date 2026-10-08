@@ -55,6 +55,17 @@ public class EventController {
         return ResponseEntity.ok(created);
     }
 
+    // PUT /api/events/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateEvent(@PathVariable("id") int id, @RequestBody Event event) {
+        Event existing = eventDao.getEventById(id);
+        if (existing == null) {
+            return ResponseEntity.notFound().build();
+        }
+        event.setEventId(id);
+        Event updated = eventDao.updateEvent(event);
+        return ResponseEntity.ok(updated);
+    }
 
     // DELETE /api/events/{id}
     @DeleteMapping("/{id}")
