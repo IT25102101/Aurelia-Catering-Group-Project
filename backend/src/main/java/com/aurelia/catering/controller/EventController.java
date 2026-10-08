@@ -67,5 +67,14 @@ public class EventController {
         return ResponseEntity.ok(updated);
     }
 
-
+    // DELETE /api/events/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEvent(@PathVariable("id") int id) {
+        Event existing = eventDao.getEventById(id);
+        if (existing == null) {
+            return ResponseEntity.notFound().build();
+        }
+        eventDao.deleteEvent(id);
+        return ResponseEntity.ok().build();
+    }
 }
