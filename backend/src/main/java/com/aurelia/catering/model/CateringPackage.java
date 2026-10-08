@@ -1,8 +1,8 @@
 package com.aurelia.catering.model;
 
 /**
- * Model representing a catering package from the CATERING_PACKAGE table in AureliaCatering2.
- * Columns: PackageID, PackageName, Description, Price
+ * Model representing a catering package from the CateringPackage table in AureliaCatering2.
+ * Columns: PackageID, PackageName, Description, Price, PackageType
  */
 public class CateringPackage {
 
@@ -10,6 +10,9 @@ public class CateringPackage {
     private String name;
     private String description;
     private Double price;
+    private String packageType = "General";
+    private Integer minGuestCount = 50;
+    private Integer maxGuestCount = 300;
 
     public CateringPackage() {
     }
@@ -19,6 +22,15 @@ public class CateringPackage {
         this.name = name;
         this.description = description;
         this.price = price;
+        this.packageType = "General";
+    }
+
+    public CateringPackage(Integer id, String name, String description, Double price, String packageType) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.packageType = packageType != null ? packageType : "General";
     }
 
     public Integer getId() {
@@ -68,4 +80,29 @@ public class CateringPackage {
     public void setPrice(Double price) {
         this.price = price;
     }
+
+    public String getPackageType() {
+        return packageType;
+    }
+
+    public void setPackageType(String packageType) {
+        this.packageType = packageType != null ? packageType : "General";
+    }
+
+    public Integer getMinGuestCount() {
+        return minGuestCount;
+    }
+
+    public void setMinGuestCount(Integer minGuestCount) {
+        this.minGuestCount = minGuestCount;
+    }
+
+    public Integer getMaxGuestCount() {
+        return maxGuestCount;
+    }
+
+    public void setMaxGuestCount(Integer maxGuestCount) {
+        this.maxGuestCount = maxGuestCount;
+    }
 }
+

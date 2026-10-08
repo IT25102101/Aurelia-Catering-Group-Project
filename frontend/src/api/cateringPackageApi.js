@@ -53,3 +53,20 @@ export async function deleteCateringPackage(id) {
   const response = await fetch(`${BASE}/${id}`, { method: "DELETE" });
   if (!response.ok) throw new Error(`Failed to delete CateringPackage with id ${id}`);
 }
+
+// STRATEGY PATTERN: Discover available pricing strategies
+export async function getPricingStrategies() {
+  const response = await fetch(`${BASE}/strategies`);
+  if (!response.ok) throw new Error("Failed to fetch pricing strategies");
+  return response.json();
+}
+
+// STRATEGY PATTERN: Calculate dynamic package price based on strategy & guest count
+export async function calculatePackagePrice(id, strategy = "fixed", guests = 50) {
+  const response = await fetch(`${BASE}/${id}/calculate-price?strategy=${encodeURIComponent(strategy)}&guests=${guests}`, {
+    method: "POST"
+  });
+  if (!response.ok) throw new Error("Failed to calculate package price");
+  return response.json();
+}
+

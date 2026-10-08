@@ -9,14 +9,7 @@
 --
 -- This module's tables : CateringPackage, PACKAGE_MENU_ITEM
 --
--- HOW TO RUN
---   Open in SQL Server Management Studio and press Execute (F5).
---   The file is standalone: it creates the database if needed, creates the tables it needs
---   only when they are missing, and loads sample rows only when they are missing.
---   It can be run any number of times, and it works next to the other 6 module files.
---   The demo blocks in Parts 5 and 6 run inside a transaction that is rolled back,
---   so the sample data is never changed.
---
+
 -- PARTS IN THIS FILE
 --   Part 1: EER Diagram & Database Design
 --   Part 2: Table Creation

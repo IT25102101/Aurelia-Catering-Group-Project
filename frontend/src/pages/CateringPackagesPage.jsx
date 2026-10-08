@@ -5,6 +5,8 @@ import {
   createCateringPackage,
   updateCateringPackage,
   deleteCateringPackage,
+  getPricingStrategies,
+  calculatePackagePrice,
 } from "../api/cateringPackageApi";
 import { getMenuItems } from "../api/menuItemApi";
 import {
@@ -13,17 +15,28 @@ import {
   removeMenuItemFromPackage,
 } from "../api/packageMenuItemApi";
 
+const PACKAGE_TYPES = [
+  { value: "Wedding", label: "Wedding (50-500 guests)", defaultMin: 50, defaultMax: 500 },
+  { value: "Birthday", label: "Birthday (15-80 guests)", defaultMin: 15, defaultMax: 80 },
+  { value: "Corporate", label: "Corporate (30-350 guests)", defaultMin: 30, defaultMax: 350 },
+  { value: "Gala", label: "Gala (100-1000 guests)", defaultMin: 100, defaultMax: 1000 },
+  { value: "General", label: "General (20-250 guests)", defaultMin: 20, defaultMax: 250 },
+];
+
 const emptyForm = {
   name: "",
   description: "",
   price: "",
+  packageType: "General",
   minGuestCount: "50",
   maxGuestCount: "300",
 };
 
 /**
  * CRUD screen for "6.3 Catering Package Management" & Package Menu Composition.
- * Features guest count validation, package CRUD, and dynamic menu item assignment.
+ * Demonstrates:
+ * - Creational: Factory Pattern (Occasion-specific Package instantiation)
+ * - Behavioral: Strategy Pattern (Interchangeable Package Pricing algorithms)
  */
 export default function CateringPackagesPage() {
   // --- Packages State ---
@@ -45,22 +58,38 @@ export default function CateringPackagesPage() {
   const [packageItemError, setPackageItemError] = useState("");
   const [packageItemSuccess, setPackageItemSuccess] = useState("");
 
-  const menuSectionRef = useRef(null);
+  // --- Strategy Pattern Dynamic Pricing State ---
+  const [strategies, setStrategies] = useState([]);
+  const [selectedStrategy, setSelectedStrategy] = useState("fixed");
+  const [calcGuests, setCalcGuests] = useState(100);
+  const [pricingBreakdown, setPricingBreakdown] = useState(null);
+  const [calcLoading, setCalcLoading] = useState(false);
+  const [calcError, setCalcError] = useState("");
 
-  // Load packages and menu catalog on mount
+  const menuSectionRef = useRef(null);
+  const strategySectionRef = useRef(null);
+
+  // Load packages, menu catalog, and pricing strategies on mount
   const loadItems = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
       setLoading(true);
       setError("");
     }
     try {
-      const [packagesData, menuData] = await Promise.all([
+      const [packagesData, menuData, strategiesData] = await Promise.all([
         getCateringPackages(),
         getMenuItems(),
+        getPricingStrategies().catch(() => [
+          { code: "fixed", name: "Fixed Base Package Pricing", description: "Standard flat fee" },
+          { code: "per_guest", name: "Per-Guest Headcount Pricing", description: "Per-person with tiered discounts" },
+          { code: "occasion", name: "Occasion-Specific Pricing", description: "Occasion luxury/commercial multipliers" },
+          { code: "food_value", name: "Menu Food-Value Costing", description: "Itemized dish cost + 25% margin" },
+        ]),
       ]);
       const pkgList = Array.isArray(packagesData) ? packagesData : [];
       setItems(pkgList);
       setMenuItemsCatalog(Array.isArray(menuData) ? menuData : []);
+      setStrategies(Array.isArray(strategiesData) ? strategiesData : []);
 
       // Auto-select first package if none selected
       if (!selectedPackage && pkgList.length > 0) {
@@ -101,6 +130,37 @@ export default function CateringPackagesPage() {
     }
   }, [selectedPackage, loadAssignedItems]);
 
+  // Calculate pricing using Strategy Pattern
+  const handleCalculatePricing = useCallback(async () => {
+    if (!selectedPackage?.id) return;
+    setCalcLoading(true);
+    setCalcError("");
+    try {
+      const result = await calculatePackagePrice(selectedPackage.id, selectedStrategy, Number(calcGuests));
+      setPricingBreakdown(result);
+    } catch (err) {
+      setCalcError("Pricing estimation error: " + (err.message || "Calculation failed"));
+    } finally {
+      setCalcLoading(false);
+    }
+  }, [selectedPackage, selectedStrategy, calcGuests]);
+
+  useEffect(() => {
+    if (selectedPackage?.id) {
+      handleCalculatePricing();
+    }
+  }, [selectedPackage?.id, selectedStrategy, calcGuests, packageItems.length, handleCalculatePricing]);
+
+  function handleTypeChange(newType) {
+    const matched = PACKAGE_TYPES.find((t) => t.value === newType);
+    setForm((prev) => ({
+      ...prev,
+      packageType: newType,
+      minGuestCount: matched ? String(matched.defaultMin) : prev.minGuestCount,
+      maxGuestCount: matched ? String(matched.defaultMax) : prev.maxGuestCount,
+    }));
+  }
+
   function validate() {
     const errs = {};
     if (!form.name || !form.name.trim()) {
@@ -137,6 +197,7 @@ export default function CateringPackagesPage() {
         name: form.name.trim(),
         description: form.description.trim() || null,
         price: parseFloat(form.price),
+        packageType: form.packageType || "General",
         minGuestCount: parseInt(form.minGuestCount, 10),
         maxGuestCount: parseInt(form.maxGuestCount, 10),
       };
@@ -162,6 +223,7 @@ export default function CateringPackagesPage() {
       name: item.name || "",
       description: item.description || "",
       price: item.price !== null && item.price !== undefined ? String(item.price) : "",
+      packageType: item.packageType || "General",
       minGuestCount: item.minGuestCount !== null && item.minGuestCount !== undefined ? String(item.minGuestCount) : "50",
       maxGuestCount: item.maxGuestCount !== null && item.maxGuestCount !== undefined ? String(item.maxGuestCount) : "300",
     });
@@ -248,6 +310,7 @@ export default function CateringPackagesPage() {
     }
     setPackageItemError("");
     setPackageItemSuccess("");
+
     try {
       await removeMenuItemFromPackage(id);
       setPackageItemSuccess("Dish removed from package.");
@@ -261,7 +324,7 @@ export default function CateringPackagesPage() {
     <DashboardLayout>
       <DashboardHeader
         title="Manage Catering Packages"
-        subtitle="Configure full-service packages, guest tiers, fixed rates, and assigned menu items."
+        subtitle="Configure occasion packages, guest tiers, pricing strategies, and assigned menu items."
         showGreeting={false}
       />
       <div className="dashboard-content">
@@ -274,29 +337,53 @@ export default function CateringPackagesPage() {
 
         {/* ── Package Form ─────────────────────────────────────────── */}
         <form className="card" onSubmit={handleSubmit} noValidate>
-          <h3 style={{ marginTop: 0 }}>{editingId ? `Edit Package #${editingId}` : "Create New Catering Package"}</h3>
+          <h3 style={{ marginTop: 0 }}>
+            {editingId ? `Edit Package #${editingId}` : "Create New Catering Package"}
+          </h3>
 
-          {/* Name */}
-          <div className="form-group">
-            <label htmlFor="pkg-name-input">
-              Package Title <span style={{ color: "var(--gold, #d4af37)" }}>*</span>
-            </label>
-            <input
-              id="pkg-name-input"
-              type="text"
-              placeholder="e.g. Royal Wedding Grand Package"
-              value={form.name}
-              onChange={(e) => {
-                setForm({ ...form, name: e.target.value });
-                if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: "" }));
-              }}
-              disabled={submitting}
-            />
-            {fieldErrors.name && (
-              <div style={{ color: "#e74c3c", fontSize: "0.85rem", marginTop: 4 }}>
-                {fieldErrors.name}
-              </div>
-            )}
+          <div className="form-grid-2">
+            {/* Name */}
+            <div className="form-group">
+              <label htmlFor="pkg-name-input">
+                Package Title <span style={{ color: "var(--gold, #d4af37)" }}>*</span>
+              </label>
+              <input
+                id="pkg-name-input"
+                type="text"
+                placeholder="e.g. Royal Wedding Grand Package"
+                value={form.name}
+                onChange={(e) => {
+                  setForm({ ...form, name: e.target.value });
+                  if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: "" }));
+                }}
+                disabled={submitting}
+              />
+              {fieldErrors.name && (
+                <div style={{ color: "#e74c3c", fontSize: "0.85rem", marginTop: 4 }}>
+                  {fieldErrors.name}
+                </div>
+              )}
+            </div>
+
+            {/* Package Type (Factory Pattern ISA Discriminator) */}
+            <div className="form-group">
+              <label htmlFor="pkg-type-select">
+                Occasion Type (Factory Pattern) <span style={{ color: "var(--gold, #d4af37)" }}>*</span>
+              </label>
+              <select
+                id="pkg-type-select"
+                value={form.packageType}
+                onChange={(e) => handleTypeChange(e.target.value)}
+                disabled={submitting}
+                style={{ width: "100%", padding: "10px", borderRadius: 6, background: "var(--surface, #1e1e1e)", color: "#fff", border: "1px solid #444" }}
+              >
+                {PACKAGE_TYPES.map((pt) => (
+                  <option key={pt.value} value={pt.value}>
+                    {pt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Description */}
@@ -315,14 +402,14 @@ export default function CateringPackagesPage() {
           {/* Price */}
           <div className="form-group">
             <label htmlFor="pkg-price-input">
-              Price per Guest (LKR) <span style={{ color: "var(--gold, #d4af37)" }}>*</span>
+              Base Package Price (LKR) <span style={{ color: "var(--gold, #d4af37)" }}>*</span>
             </label>
             <input
               id="pkg-price-input"
               type="number"
               min="0"
               step="0.01"
-              placeholder="e.g. 4500"
+              placeholder="e.g. 50000"
               value={form.price}
               onChange={(e) => {
                 setForm({ ...form, price: e.target.value });
@@ -421,8 +508,9 @@ export default function CateringPackagesPage() {
               <thead>
                 <tr>
                   <th>ID</th>
+                  <th>Occasion Type</th>
                   <th>Package Title</th>
-                  <th>Price / Guest</th>
+                  <th>Base Price</th>
                   <th>Guest Range</th>
                   <th>Actions</th>
                 </tr>
@@ -430,12 +518,33 @@ export default function CateringPackagesPage() {
               <tbody>
                 {items.map((item) => {
                   const isSelected = selectedPackage?.id === item.id;
+                  const type = item.packageType || "General";
                   return (
                     <tr
                       key={item.id}
                       style={isSelected ? { background: "rgba(212, 175, 55, 0.08)" } : undefined}
                     >
                       <td><strong>#{item.id}</strong></td>
+                      <td>
+                        <span style={{
+                          display: "inline-block",
+                          padding: "3px 8px",
+                          borderRadius: 4,
+                          fontSize: "0.8rem",
+                          fontWeight: "bold",
+                          background: type === "Wedding" ? "rgba(230, 126, 34, 0.2)" :
+                                      type === "Gala" ? "rgba(155, 89, 182, 0.2)" :
+                                      type === "Corporate" ? "rgba(52, 152, 219, 0.2)" :
+                                      type === "Birthday" ? "rgba(241, 196, 15, 0.2)" : "rgba(149, 165, 166, 0.2)",
+                          color: type === "Wedding" ? "#e67e22" :
+                                 type === "Gala" ? "#9b59b6" :
+                                 type === "Corporate" ? "#3498db" :
+                                 type === "Birthday" ? "#f1c40f" : "#bdc3c7",
+                          border: "1px solid currentColor"
+                        }}>
+                          {type}
+                        </span>
+                      </td>
                       <td>
                         <strong>{item.name}</strong>
                         {item.description && (
@@ -466,7 +575,7 @@ export default function CateringPackagesPage() {
                           onClick={() => handleManageMenuItems(item)}
                           title="Assign and manage dishes for this package"
                         >
-                          {isSelected ? "Menu Assigned" : "Manage Menu"}
+                          {isSelected ? "Active Package" : "Select & Manage"}
                         </button>
                         <button className="btn secondary sm" onClick={() => handleEdit(item)}>
                           Edit
@@ -487,6 +596,110 @@ export default function CateringPackagesPage() {
           </div>
         )}
 
+        {/* ── Strategy Pattern: Dynamic Pricing & Cost Engine ──────── */}
+        {selectedPackage && (
+          <div ref={strategySectionRef} style={{ marginTop: 32 }}>
+            <div className="card" style={{ border: "1px solid rgba(52, 152, 219, 0.4)", background: "rgba(52, 152, 219, 0.03)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+                <div>
+                  <div style={{ display: "inline-block", padding: "2px 8px", background: "#2980b9", color: "#fff", borderRadius: 4, fontSize: "0.75rem", fontWeight: "bold", marginBottom: 6 }}>
+                    BEHAVIORAL DESIGN PATTERN: STRATEGY
+                  </div>
+                  <h3 style={{ margin: "4px 0", color: "#3498db" }}>
+                    Dynamic Package Pricing & Cost Breakdown Calculator
+                  </h3>
+                  <p style={{ margin: "2px 0 0", fontSize: "0.85rem", color: "var(--muted, #888)" }}>
+                    Selected: <strong>{selectedPackage.name}</strong> ({selectedPackage.packageType || "General"}) — Demonstrates interchangeable pricing algorithms at runtime.
+                  </p>
+                </div>
+              </div>
+
+              {/* Strategy Controls */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 20, background: "rgba(0,0,0,0.2)", padding: 16, borderRadius: 8 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", marginBottom: 6, fontWeight: 600 }}>
+                    Select Pricing Strategy:
+                  </label>
+                  <select
+                    value={selectedStrategy}
+                    onChange={(e) => setSelectedStrategy(e.target.value)}
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: 6, background: "var(--surface, #1e1e1e)", color: "#fff", border: "1px solid #3498db" }}
+                  >
+                    {strategies.map((st) => (
+                      <option key={st.code} value={st.code}>
+                        {st.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.85rem", marginBottom: 6, fontWeight: 600 }}>
+                    Estimated Guest Count:
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="2000"
+                    value={calcGuests}
+                    onChange={(e) => setCalcGuests(e.target.value)}
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: 6, background: "var(--surface, #1e1e1e)", color: "#fff", border: "1px solid #444" }}
+                  />
+                </div>
+
+                <div style={{ display: "flex", alignItems: "flex-end" }}>
+                  <button
+                    type="button"
+                    className="btn sm"
+                    onClick={handleCalculatePricing}
+                    disabled={calcLoading}
+                    style={{ width: "100%", background: "#3498db", border: "none" }}
+                  >
+                    {calcLoading ? "Recalculating..." : "Execute Strategy"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Strategy Results Display */}
+              {calcError && (
+                <div className="error-text" style={{ padding: "8px 12px", marginBottom: 12, borderRadius: 6 }}>
+                  {calcError}
+                </div>
+              )}
+
+              {pricingBreakdown && (
+                <div style={{ background: "rgba(255,255,255,0.03)", padding: 16, borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: 12, marginBottom: 12 }}>
+                    <div>
+                      <span style={{ fontSize: "0.85rem", color: "#3498db", fontWeight: 600 }}>ACTIVE ALGORITHM:</span>
+                      <h4 style={{ margin: "2px 0 0" }}>{pricingBreakdown.strategyName}</h4>
+                      <small style={{ color: "var(--muted, #888)" }}>{pricingBreakdown.strategyDescription}</small>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <span style={{ fontSize: "0.8rem", color: "var(--muted, #888)" }}>COMPUTED TOTAL ESTIMATION:</span>
+                      <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "var(--gold, #d4af37)" }}>
+                        Rs. {Number(pricingBreakdown.finalTotalPrice || 0).toLocaleString("en-LK", { minimumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Calculation Details & Notes */}
+                  {pricingBreakdown.calculationNotes && pricingBreakdown.calculationNotes.length > 0 && (
+                    <div style={{ marginTop: 8 }}>
+                      <span style={{ fontSize: "0.8rem", color: "var(--muted, #aaa)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Strategy Calculation Breakdown:</span>
+                      <ul style={{ margin: "6px 0 0", paddingLeft: 20, fontSize: "0.88rem", color: "#ddd", lineHeight: "1.5" }}>
+                        {pricingBreakdown.calculationNotes.map((note, idx) => (
+                          <li key={idx}>{note}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ── Package Menu Items Composition Section ───────────────── */}
         <div ref={menuSectionRef} style={{ marginTop: 40 }}>
           <div className="card" style={{ border: "1px solid rgba(212, 175, 55, 0.3)" }}>
@@ -496,7 +709,7 @@ export default function CateringPackagesPage() {
                   Package Menu Composition
                 </h3>
                 <p style={{ margin: "4px 0 0", fontSize: "0.9rem", color: "var(--muted, #888)" }}>
-                  Assign dishes from the Menu Catalog to this package. Ingredients are automatically calculated during event bookings.
+                  Assign dishes from the Menu Catalog to this package. Ingredients and food values are computed dynamically.
                 </p>
               </div>
 
@@ -515,7 +728,7 @@ export default function CateringPackagesPage() {
                 >
                   {items.map((p) => (
                     <option key={p.id} value={p.id}>
-                      #{p.id} - {p.name} (Rs. {Number(p.price || 0).toLocaleString("en-LK")})
+                      #{p.id} [{p.packageType || "General"}] {p.name} (Rs. {Number(p.price || 0).toLocaleString("en-LK")})
                     </option>
                   ))}
                 </select>
@@ -655,5 +868,6 @@ export default function CateringPackagesPage() {
     </DashboardLayout>
   );
 }
+
 
 
