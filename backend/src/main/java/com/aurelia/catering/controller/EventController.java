@@ -1,4 +1,4 @@
-
+package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.EventDao;
 import com.aurelia.catering.model.Event;
