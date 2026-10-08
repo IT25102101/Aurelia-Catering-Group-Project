@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
-import { DashboardLayout, DashboardHeader, StatusBadge } from "../components/dashboard";
+import { DashboardLayout, DashboardHeader, StatusBadge } from "../../components/dashboard";
 import {
   getStaffs,
   createStaff,
   updateStaff,
   deleteStaff,
-} from "../api/staffApi";
+} from "../../api/staffApi";
 
 const STAFF_ROLES = [
   { value: "ADMIN", label: "Admin" },

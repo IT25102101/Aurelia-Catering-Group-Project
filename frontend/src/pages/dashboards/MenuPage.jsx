@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import { getMenuItems } from "../api/menuItemApi";
-import { useCart } from "../context/CartContext";
-import CartDrawer from "../components/CartDrawer";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import { getMenuItems } from "../../api/menuItemApi";
+import { useCart } from "../../context/CartContext";
+import CartDrawer from "../../components/CartDrawer";
 
 // Curated fallback dishes used if backend is offline or starting up
 const FALLBACK_MENU_ITEMS = [

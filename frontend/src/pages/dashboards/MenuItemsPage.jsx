@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
-import { DashboardLayout, DashboardHeader } from "../components/dashboard";
+import { DashboardLayout, DashboardHeader } from "../../components/dashboard";
 import {
   getMenuItems,
   createMenuItem,
   updateMenuItem,
   deleteMenuItem,
-} from "../api/menuItemApi";
+} from "../../api/menuItemApi";
 
 const emptyForm = {
   name: "",

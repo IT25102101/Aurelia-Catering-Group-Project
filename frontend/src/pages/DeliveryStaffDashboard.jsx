@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
-import RequireRole from "../../components/RequireRole";
-import { useAuth } from "../../AuthContext";
+import RequireRole from "../components/RequireRole.jsx";
+import { useAuth } from "../AuthContext.jsx";
 import {
   DashboardLayout,
   DashboardHeader,
@@ -11,11 +11,11 @@ import {
   AlertCard,
   SectionHeader,
   DashboardTable,
-} from "../../components/dashboard";
-import { getDeliverys } from "../../api/deliveryApi";
-import { getOrders } from "../../api/orderApi";
-import { getEvents } from "../../api/eventApi";
-import { getStaffs } from "../../api/staffApi";
+} from "../components/dashboard/index.js";
+import { getDeliverys } from "../api/deliveryApi.js";
+import { getOrders } from "../api/orderApi.js";
+import { getEvents } from "../api/eventApi.js";
+import { getStaffs } from "../api/staffApi.js";
 
 /* ── SVG Icons ─────────────────────────────────────────────────── */
 const DeliveryIcons = {

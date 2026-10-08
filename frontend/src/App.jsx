@@ -5,7 +5,7 @@ import RequireRole from "./components/RequireRole";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import MenuPage from "./pages/MenuPage";
+import MenuPage from "./pages/dashboards/MenuPage";
 import PackagesPage from "./pages/PackagesPage";
 import PublicEventsPage from "./pages/PublicEventsPage";
 import AboutPage from "./pages/AboutPage";
@@ -15,19 +15,19 @@ import OrderTrackingPage from "./pages/OrderTrackingPage";
 
 // Management pages — one per major function (Section 6 of the proposal)
 import EventsPage from "./pages/EventsPage";
-import MenuItemsPage from "./pages/MenuItemsPage";
+import MenuItemsPage from "./pages/dashboards/MenuItemsPage";
 import CateringPackagesPage from "./pages/CateringPackagesPage";
 import OrdersPage from "./pages/OrdersPage";
 import InventoryItemsPage from "./pages/InventoryItemsPage";
 import DeliveriesPage from "./pages/DeliveriesPage";
-import StaffPage from "./pages/StaffPage";
+import StaffPage from "./pages/dashboards/StaffPage";
 import RecipesPage from "./pages/RecipesPage";
 
 // Role dashboards — where each stakeholder lands after login
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
 import OperationsSupervisorDashboard from "./pages/dashboards/OperationsSupervisorDashboard";
 import KitchenStaffDashboard from "./pages/dashboards/KitchenStaffDashboard";
-import DeliveryStaffDashboard from "./pages/dashboards/DeliveryStaffDashboard";
+import DeliveryStaffDashboard from "./pages/DeliveryStaffDashboard";
 import FinanceOfficerDashboard from "./pages/dashboards/FinanceOfficerDashboard";
 import InventoryCoordinatorDashboard from "./pages/dashboards/InventoryCoordinatorDashboard";
 import CustomerDashboard from "./pages/dashboards/CustomerDashboard";
