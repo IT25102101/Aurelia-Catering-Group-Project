@@ -46,14 +46,7 @@ public class EventController {
     }
 
     // POST /api/events
-    @PostMapping
-    public ResponseEntity<?> createEvent(@RequestBody Event event) {
-        if (event.getOrderId() == null || event.getOrderId() <= 0) {
-            return ResponseEntity.badRequest().body("Valid OrderID is required.");
-        }
-        Event created = eventDao.createEvent(event);
-        return ResponseEntity.ok(created);
-    }
+
 
     // PUT /api/events/{id}
     @PutMapping("/{id}")
