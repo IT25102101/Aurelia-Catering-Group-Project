@@ -8,12 +8,6 @@ import java.time.LocalDate;
  */
 public class Event {
 
-    private Integer eventId;
-    private Integer orderId;
-    private LocalDate eventDate;
-    private String location;
-    private Integer guestCount;
-    private String eventType;
 
     public Event() {
     }
