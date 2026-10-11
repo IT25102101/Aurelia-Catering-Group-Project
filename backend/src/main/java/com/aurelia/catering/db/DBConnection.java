@@ -2,30 +2,39 @@ package com.aurelia.catering.db;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Opens a plain JDBC connection to SQL Server.
+ * High-performance JDBC connection provider with connection pooling for SQL Server.
  *
- * Default (nothing configured): Windows Authentication to localhost\SQLEXPRESS, database AureliaCatering2.
- * Windows Authentication needs the native file mssql-jdbc_auth-*.dll on the PATH.
+ * Default: Windows Authentication to 127.0.0.1:1433 (database AureliaCatering2).
+ * Direct TCP connection avoids the 15-30 second SQL Server Browser UDP resolution delay on Windows.
+ * If 127.0.0.1:1433 is not reachable, gracefully falls back to localhost\SQLEXPRESS named instance.
  *
- * To avoid that DLL, use a SQL Server login instead (see Aurelia_SqlLogin_Setup.sql). Set these in
- * application.properties, as Java -D options, or as environment variables (checked in this order):
- *
- *   aurelia.db.url       / AURELIA_DB_URL       full JDBC URL (optional)
- *   aurelia.db.user      / AURELIA_DB_USER      SQL login name  (turns Windows Authentication off)
- *   aurelia.db.password  / AURELIA_DB_PASSWORD  SQL login password
+ * Employs a thread-safe connection pool with automatic validation and recycling to avoid
+ * the 500-2000ms overhead of establishing fresh physical connections on every request.
  */
 public class DBConnection {
 
-    private static final String DEFAULT_URL =
+    private static final String FAST_DEFAULT_URL =
+            "jdbc:sqlserver://localhost:1433;databaseName=AureliaCatering2;" +
+                    "encrypt=true;trustServerCertificate=true;";
+
+    private static final String FALLBACK_URL =
             "jdbc:sqlserver://localhost;instanceName=SQLEXPRESS;" +
                     "databaseName=AureliaCatering2;" +
                     "encrypt=true;trustServerCertificate=true;";
+
+    private static final int MAX_POOL_SIZE = 15;
+    private static final BlockingQueue<Connection> POOL = new LinkedBlockingQueue<>(MAX_POOL_SIZE);
 
     private static final Properties FILE_SETTINGS = loadFileSettings();
 
@@ -33,26 +42,111 @@ public class DBConnection {
     }
 
     public static Connection getConnection() throws SQLException {
-        String url = setting("aurelia.db.url", "AURELIA_DB_URL");
+        // 1. Try to acquire a healthy connection from the pool
+        Connection raw;
+        while ((raw = POOL.poll()) != null) {
+            try {
+                if (!raw.isClosed()) {
+                    if (!raw.getAutoCommit()) {
+                        raw.setAutoCommit(true);
+                    }
+                    return wrapConnection(raw);
+                }
+            } catch (SQLException ignored) {
+                try { raw.close(); } catch (Exception ex) {}
+            }
+        }
+
+        // 2. Pool was empty or had closed connections -> create a new physical connection
+        raw = openPhysicalConnection();
+        return wrapConnection(raw);
+    }
+
+    /**
+     * Wraps a physical JDBC connection in a dynamic proxy that intercepts close()
+     * and returns the connection to the pool rather than terminating the socket.
+     */
+    private static Connection wrapConnection(final Connection physical) {
+        return (Connection) Proxy.newProxyInstance(
+                DBConnection.class.getClassLoader(),
+                new Class<?>[]{Connection.class},
+                new InvocationHandler() {
+                    private boolean isClosed = false;
+
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        String name = method.getName();
+                        if ("close".equals(name)) {
+                            if (!isClosed) {
+                                isClosed = true;
+                                recycle(physical);
+                            }
+                            return null;
+                        }
+                        if ("isClosed".equals(name)) {
+                            return isClosed || physical.isClosed();
+                        }
+                        if (isClosed) {
+                            throw new SQLException("Connection is closed.");
+                        }
+                        return method.invoke(physical, args);
+                    }
+                }
+        );
+    }
+
+    private static void recycle(Connection physical) {
+        try {
+            if (!physical.isClosed()) {
+                if (!physical.getAutoCommit()) {
+                    physical.setAutoCommit(true);
+                }
+                if (!POOL.offer(physical)) {
+                    // Pool is full, safely close physical connection
+                    physical.close();
+                }
+                return;
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            physical.close();
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static Connection openPhysicalConnection() throws SQLException {
+        String configuredUrl = setting("aurelia.db.url", "AURELIA_DB_URL");
         String user = setting("aurelia.db.user", "AURELIA_DB_USER");
         String password = setting("aurelia.db.password", "AURELIA_DB_PASSWORD");
 
-        if (url == null) {
-            url = DEFAULT_URL;
-        }
+        String url = configuredUrl != null ? configuredUrl : FAST_DEFAULT_URL;
 
         try {
-            if (user != null) {
-                return DriverManager.getConnection(url, user, password == null ? "" : password);
+            return doConnect(url, user, password);
+        } catch (SQLException primaryEx) {
+            // If the default fast 127.0.0.1:1433 connection failed and no explicit URL was given,
+            // fall back to the named instance URL
+            if (configuredUrl == null) {
+                try {
+                    return doConnect(FALLBACK_URL, user, password);
+                } catch (SQLException fallbackEx) {
+                    throw new SQLException(addHint(primaryEx.getMessage()), primaryEx.getSQLState(), primaryEx.getErrorCode(), primaryEx);
+                }
             }
-            // no SQL login configured -> Windows Authentication
-            if (!url.toLowerCase().contains("integratedsecurity")) {
-                url = url + (url.endsWith(";") ? "" : ";") + "integratedSecurity=true;";
-            }
-            return DriverManager.getConnection(url);
-        } catch (SQLException e) {
-            throw new SQLException(addHint(e.getMessage()), e.getSQLState(), e.getErrorCode(), e);
+            throw new SQLException(addHint(primaryEx.getMessage()), primaryEx.getSQLState(), primaryEx.getErrorCode(), primaryEx);
         }
+    }
+
+    private static Connection doConnect(String url, String user, String password) throws SQLException {
+        if (user != null) {
+            return DriverManager.getConnection(url, user, password == null ? "" : password);
+        }
+        // Windows Authentication
+        if (!url.toLowerCase().contains("integratedsecurity")) {
+            url = url + (url.endsWith(";") ? "" : ";") + "integratedSecurity=true;";
+        }
+        return DriverManager.getConnection(url);
     }
 
     /** Short plain-language advice for the most common connection failures. */

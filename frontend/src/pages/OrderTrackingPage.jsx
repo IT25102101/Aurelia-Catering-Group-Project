@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ScrollReveal from "../components/common/ScrollReveal";
 import { getOrderById, getOrderStatusHistory } from "../api/orderApi";
 import { getEventByOrderId } from "../api/eventApi";
 import { getCateringPackageById } from "../api/cateringPackageApi";
@@ -165,7 +166,7 @@ export default function OrderTrackingPage() {
         <div className="container" style={{ maxWidth: "800px", margin: "0 auto", padding: "0 1rem" }}>
           
           {/* Header Banner */}
-          <div className="text-center mb-8" style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <ScrollReveal variant="fade-up" className="text-center mb-8" style={{ textAlign: "center", marginBottom: "2rem" }}>
             <span className="eyebrow" style={{ color: "var(--gold, #B8922A)", letterSpacing: "0.15em", textTransform: "uppercase", fontSize: "0.85rem", fontWeight: "600" }}>
               Guest Order Tracking
             </span>
@@ -175,10 +176,10 @@ export default function OrderTrackingPage() {
             <p style={{ color: "var(--text-muted, #5A655C)", fontSize: "1.05rem", maxWidth: "580px", margin: "0 auto" }}>
               Enter your Order ID to check your reservation status, event logistics, and timeline updates in real time.
             </p>
-          </div>
+          </ScrollReveal>
 
           {/* Search Form Card */}
-          <div className="card mb-8" style={{ padding: "2rem", borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", background: "#fff", marginBottom: "2rem" }}>
+          <ScrollReveal variant="fade-up" delay={80} className="card mb-8" style={{ padding: "2rem", borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", background: "#fff", marginBottom: "2rem" }}>
             <form onSubmit={handleFormSubmit} noValidate>
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "flex-end" }}>
                 <div style={{ flex: "1 1 300px" }}>
@@ -238,7 +239,7 @@ export default function OrderTrackingPage() {
                 </div>
               )}
             </form>
-          </div>
+          </ScrollReveal>
 
           {/* Loading Indicator */}
           {loading && (

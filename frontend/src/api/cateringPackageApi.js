@@ -12,11 +12,35 @@ import { API_BASE_URL } from "./config";
 
 const BASE = `${API_BASE_URL}/catering-packages`;
 
-// READ (all)
-export async function getCateringPackages() {
-  const response = await fetch(BASE);
-  if (!response.ok) throw new Error("Failed to fetch catering-packages");
-  return response.json();
+let cachedPackages = null;
+let inFlightPackagesPromise = null;
+
+export function invalidateCateringPackagesCache() {
+  cachedPackages = null;
+}
+
+// READ (all) with in-flight deduplication and safe caching
+export async function getCateringPackages(forceRefresh = false) {
+  if (!forceRefresh && cachedPackages) {
+    return cachedPackages;
+  }
+  if (!forceRefresh && inFlightPackagesPromise) {
+    return inFlightPackagesPromise;
+  }
+
+  inFlightPackagesPromise = (async () => {
+    try {
+      const response = await fetch(BASE);
+      if (!response.ok) throw new Error("Failed to fetch catering-packages");
+      const data = await response.json();
+      cachedPackages = data;
+      return data;
+    } finally {
+      inFlightPackagesPromise = null;
+    }
+  })();
+
+  return inFlightPackagesPromise;
 }
 
 // READ (one, by id)
@@ -34,6 +58,7 @@ export async function createCateringPackage(cateringPackageData) {
     body: JSON.stringify(cateringPackageData),
   });
   if (!response.ok) throw new Error("Failed to create CateringPackage");
+  invalidateCateringPackagesCache();
   return response.json();
 }
 
@@ -45,6 +70,7 @@ export async function updateCateringPackage(id, cateringPackageData) {
     body: JSON.stringify(cateringPackageData),
   });
   if (!response.ok) throw new Error(`Failed to update CateringPackage with id ${id}`);
+  invalidateCateringPackagesCache();
   return response.json();
 }
 
@@ -52,6 +78,7 @@ export async function updateCateringPackage(id, cateringPackageData) {
 export async function deleteCateringPackage(id) {
   const response = await fetch(`${BASE}/${id}`, { method: "DELETE" });
   if (!response.ok) throw new Error(`Failed to delete CateringPackage with id ${id}`);
+  invalidateCateringPackagesCache();
 }
 
 // STRATEGY PATTERN: Discover available pricing strategies

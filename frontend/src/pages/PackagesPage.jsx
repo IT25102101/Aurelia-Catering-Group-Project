@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ScrollReveal from "../components/common/ScrollReveal";
 import { getCateringPackages } from "../api/cateringPackageApi";
 
 const FALLBACK_PACKAGES = [
@@ -152,21 +153,21 @@ export default function PackagesPage() {
 
       {/* ── Page Header ─────────────────────────────────────── */}
       <header className="packages-header">
-        <div className="container text-center">
+        <ScrollReveal variant="fade-up" className="container text-center">
           <span className="eyebrow">AURELIA PACKAGES</span>
           <h1 className="packages-header__title">Curated experiences for every occasion.</h1>
           <p className="packages-header__subtitle">
             Thoughtfully designed catering experiences for weddings, corporate gatherings, and private celebrations.
           </p>
           <div className="gold-rule mx-auto mt-4"></div>
-        </div>
+        </ScrollReveal>
       </header>
 
       {/* ── Category Filter Section ──────────────────────────── */}
       <section className="section bg-surface packages-catalog-section" id="packages-catalog">
         <div className="container">
           {/* Category Filter Pills */}
-          <div className="packages-category-nav" role="tablist" aria-label="Filter packages by occasion">
+          <ScrollReveal variant="fade-up" delay={80} className="packages-category-nav" role="tablist" aria-label="Filter packages by occasion">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -179,7 +180,7 @@ export default function PackagesPage() {
                 {cat}
               </button>
             ))}
-          </div>
+          </ScrollReveal>
 
           {error && (
             <div className="mb-6 p-4 text-center text-xs text-muted" role="status">
@@ -210,7 +211,7 @@ export default function PackagesPage() {
             </div>
           ) : (
             <div className="packages-catalog-grid mt-8">
-              {filteredPackages.map((pkg) => {
+              {filteredPackages.map((pkg, index) => {
                 const imgSrc = getPackageImage(pkg);
                 const priceFormatted = `Rs. ${Number(pkg.price || 0).toLocaleString("en-LK")}`;
                 const guestRange =
@@ -231,7 +232,13 @@ export default function PackagesPage() {
                       ];
 
                 return (
-                  <article key={pkg.id} className="package-catalog-card card">
+                  <ScrollReveal
+                    key={pkg.id}
+                    as="article"
+                    variant="fade-up"
+                    delay={(index % 4) * 90}
+                    className="package-catalog-card card"
+                  >
                     {/* Card Media */}
                     <div className="package-catalog-card__media img-placeholder aspect-16-9">
                       <img
@@ -290,7 +297,7 @@ export default function PackagesPage() {
                          </Link>
                       </div>
                     </div>
-                  </article>
+                  </ScrollReveal>
                 );
               })}
             </div>
@@ -301,7 +308,7 @@ export default function PackagesPage() {
       {/* ── Bespoke Consultation Section ─────────────────────── */}
       <section className="section bg-cream bespoke-consult-section">
         <div className="container">
-          <div className="bespoke-card card text-center">
+          <ScrollReveal variant="fade-up" className="bespoke-card card text-center">
             <span className="eyebrow">CUSTOM CURATIONS</span>
             <h2 className="heading-section mt-2">Looking for a completely bespoke celebration?</h2>
             <p className="section-subtitle mt-3 mx-auto" style={{ maxWidth: 620 }}>
@@ -312,7 +319,7 @@ export default function PackagesPage() {
                 Plan Custom Catering &rarr;
               </Link>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
