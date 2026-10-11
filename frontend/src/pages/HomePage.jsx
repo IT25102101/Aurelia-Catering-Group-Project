@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ScrollReveal from "../components/common/ScrollReveal";
 import { getMenuItems } from "../api/menuItemApi";
 
 // Curated seasonal items used as fallback if backend is offline/empty
@@ -127,7 +128,7 @@ export default function HomePage() {
         <div className="container">
           <div className="editorial-split">
             {/* Left Narrative Column */}
-            <div className="editorial-split__content">
+            <ScrollReveal variant="fade-up" className="editorial-split__content">
               <span className="eyebrow">OUR CULINARY PROMISE</span>
               <h2 className="heading-section mt-2 mb-4">
                 Why Aurelia Catering
@@ -176,10 +177,10 @@ export default function HomePage() {
                   Discover Catering Packages &rarr;
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Right Media Container (4:3) */}
-            <div className="editorial-split__media">
+            <ScrollReveal variant="scale-in" delay={120} className="editorial-split__media">
               <div className="img-placeholder aspect-4-3">
                 <img
                   src="/images/home/why-aurelia.jpg"
@@ -187,7 +188,7 @@ export default function HomePage() {
                   className="editorial-split__image"
                 />
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -197,7 +198,7 @@ export default function HomePage() {
           =================================================================== */}
       <section className="section bg-surface featured-menu-section">
         <div className="container">
-          <div className="section-header text-center">
+          <ScrollReveal variant="fade-up" className="section-header text-center">
             <span className="eyebrow">CURATED SELECTIONS</span>
             <h2 className="heading-section mt-2">
               Featured from our kitchen
@@ -206,11 +207,16 @@ export default function HomePage() {
               A glimpse into our seasonal tasting repertoire, crafted with fresh
               ingredients and refined presentation.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="menu-grid mt-8">
-            {featuredMenu.map((item) => (
-              <div key={item.id} className="menu-card card">
+            {featuredMenu.map((item, index) => (
+              <ScrollReveal
+                key={item.id}
+                variant="fade-up"
+                delay={index * 90}
+                className="menu-card card"
+              >
                 {/* 4:3 Food Photo Area */}
                 <div className="menu-card__media img-placeholder aspect-4-3">
                   {item.image ? (
@@ -248,15 +254,15 @@ export default function HomePage() {
                     </div>
                   )}
                 </div>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
 
-          <div className="text-center mt-10">
+          <ScrollReveal variant="fade-up" delay={150} className="text-center mt-10">
             <Link to="/menu" className="btn gold lg">
               Explore Complete Food Menu &rarr;
             </Link>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -265,7 +271,7 @@ export default function HomePage() {
           =================================================================== */}
       <section className="section bg-cream packages-section">
         <div className="container">
-          <div className="section-header text-center">
+          <ScrollReveal variant="fade-up" className="section-header text-center">
             <span className="eyebrow">TAILORED CATERING TIERS</span>
             <h2 className="heading-section mt-2">
               Catering Packages for Every Occasion
@@ -274,11 +280,11 @@ export default function HomePage() {
               Carefully designed multi-course packages, buffet setups, and dining
               solutions tailored to your guest count.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="packages-grid mt-8">
             {/* Wedding Card */}
-            <div className="package-card card">
+            <ScrollReveal variant="fade-up" delay={0} className="package-card card">
               <div className="package-card__media img-placeholder aspect-4-3">
                 <img
                   src="/images/home/package-weddings.jpg"
@@ -300,10 +306,10 @@ export default function HomePage() {
                   Explore Wedding Catering &rarr;
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Corporate Card */}
-            <div className="package-card card">
+            <ScrollReveal variant="fade-up" delay={90} className="package-card card">
               <div className="package-card__media img-placeholder aspect-4-3">
                 <img
                   src="/images/home/package-corporate.jpg"
@@ -325,10 +331,10 @@ export default function HomePage() {
                   Explore Corporate Catering &rarr;
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Private Celebrations */}
-            <div className="package-card card">
+            <ScrollReveal variant="fade-up" delay={180} className="package-card card">
               <div className="package-card__media img-placeholder aspect-4-3">
                 <img
                   src="/images/home/package-private.jpg"
@@ -350,10 +356,10 @@ export default function HomePage() {
                   Explore Private Catering &rarr;
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Special Events */}
-            <div className="package-card card">
+            <ScrollReveal variant="fade-up" delay={270} className="package-card card">
               <div className="package-card__media img-placeholder aspect-4-3">
                 <img
                   src="/images/home/package-galas.jpg"
@@ -375,7 +381,7 @@ export default function HomePage() {
                   Explore Specialty Catering &rarr;
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -387,7 +393,7 @@ export default function HomePage() {
         <div className="container">
           <div className="editorial-split editorial-split--reverse">
             {/* Left Media (4:3) */}
-            <div className="editorial-split__media">
+            <ScrollReveal variant="scale-in" className="editorial-split__media">
               <div className="img-placeholder aspect-4-3">
                 <img
                   src="/images/home/experience-aurelia.jpg"
@@ -395,10 +401,10 @@ export default function HomePage() {
                   className="editorial-split__image"
                 />
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Right Pillars Content */}
-            <div className="editorial-split__content">
+            <ScrollReveal variant="fade-up" delay={120} className="editorial-split__content">
               <span className="eyebrow">CULINARY EXCELLENCE &amp; LOGISTICS</span>
               <h2 className="heading-section mt-2 mb-4">
                 The Aurelia Catering Experience
@@ -450,7 +456,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -460,7 +466,7 @@ export default function HomePage() {
           =================================================================== */}
       <section id="events" className="section bg-cream occasions-section">
         <div className="container">
-          <div className="section-header text-center">
+          <ScrollReveal variant="fade-up" className="section-header text-center">
             <span className="eyebrow">CATERING SERVICES</span>
             <h2 className="heading-section mt-2">
               Catering Services by Occasion
@@ -468,11 +474,11 @@ export default function HomePage() {
             <p className="section-subtitle mt-2">
               Explore our specialized catering solutions designed for distinct celebration styles.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="occasions-grid mt-8">
             {/* Tile 1 */}
-            <div className="occasion-tile img-placeholder aspect-4-3">
+            <ScrollReveal variant="fade-up" delay={0} className="occasion-tile img-placeholder aspect-4-3">
               <img
                 src="/images/home/occasion-weddings.jpg"
                 alt="Aurelia Luxury Wedding Catering"
@@ -488,10 +494,10 @@ export default function HomePage() {
                   Discover Wedding Catering &rarr;
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Tile 2 */}
-            <div className="occasion-tile img-placeholder aspect-4-3">
+            <ScrollReveal variant="fade-up" delay={100} className="occasion-tile img-placeholder aspect-4-3">
               <img
                 src="/images/home/occasion-corporate.jpg"
                 alt="Aurelia Corporate Catering"
@@ -507,10 +513,10 @@ export default function HomePage() {
                   Explore Corporate Catering &rarr;
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Tile 3 */}
-            <div className="occasion-tile img-placeholder aspect-4-3">
+            <ScrollReveal variant="fade-up" delay={200} className="occasion-tile img-placeholder aspect-4-3">
               <img
                 src="/images/home/occasion-private.jpg"
                 alt="Aurelia Private Celebrations"
@@ -526,7 +532,7 @@ export default function HomePage() {
                   Plan Private Catering &rarr;
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -536,7 +542,7 @@ export default function HomePage() {
           =================================================================== */}
       <section className="section bg-surface testimonials-section">
         <div className="container">
-          <div className="section-header text-center">
+          <ScrollReveal variant="fade-up" className="section-header text-center">
             <span className="eyebrow">GUEST EXPERIENCES</span>
             <h2 className="heading-section mt-2">
               What our clients say
@@ -544,11 +550,11 @@ export default function HomePage() {
             <p className="section-subtitle mt-2">
               Reflections from hosts and couples who entrusted Aurelia with their celebrations.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="testimonials-grid mt-8">
             {/* Review 1 */}
-            <div className="testimonial-card card">
+            <ScrollReveal variant="fade-up" delay={0} className="testimonial-card card">
               <div className="testimonial-card__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
               <p className="testimonial-card__quote">
                 &ldquo;Aurelia transformed our wedding into a Michelin-level dining
@@ -559,10 +565,10 @@ export default function HomePage() {
                 <strong>Elena &amp; Marcus Vance</strong>
                 <span>Vineyard Wedding &bull; 180 Guests</span>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Review 2 */}
-            <div className="testimonial-card card">
+            <ScrollReveal variant="fade-up" delay={100} className="testimonial-card card">
               <div className="testimonial-card__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
               <p className="testimonial-card__quote">
                 &ldquo;For our annual technology summit gala, execution had to be
@@ -573,10 +579,10 @@ export default function HomePage() {
                 <strong>David Sterling</strong>
                 <span>Executive Director &bull; Annual Tech Gala</span>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Review 3 */}
-            <div className="testimonial-card card">
+            <ScrollReveal variant="fade-up" delay={200} className="testimonial-card card">
               <div className="testimonial-card__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
               <p className="testimonial-card__quote">
                 &ldquo;The custom tasting session made planning effortless. Their
@@ -587,7 +593,7 @@ export default function HomePage() {
                 <strong>Amara &amp; Rohan Kapoor</strong>
                 <span>25th Anniversary Soiree &bull; 75 Guests</span>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -596,7 +602,7 @@ export default function HomePage() {
           SECTION 8 — FINAL CALL-TO-ACTION
           =================================================================== */}
       <section id="contact" className="final-cta-section" aria-label="Book Your Catering">
-        <div className="container text-center">
+        <ScrollReveal variant="fade-up" className="container text-center">
           <span className="eyebrow eyebrow--gold">RESERVE YOUR CATERING</span>
           <h2 className="final-cta__heading mt-2">
             Let&rsquo;s make your next occasion delicious and unforgettable.
@@ -621,7 +627,7 @@ export default function HomePage() {
             <span className="concierge-dot">&bull;</span>
             <a href="mailto:events@aureliacatering.com" className="concierge-link">events@aureliacatering.com</a>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
       {/* Global Footer */}

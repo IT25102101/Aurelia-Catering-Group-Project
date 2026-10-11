@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import ScrollReveal from "../../components/common/ScrollReveal";
 import { getMenuItems } from "../../api/menuItemApi";
 import { useCart } from "../../context/CartContext";
 import CartDrawer from "../../components/CartDrawer";
@@ -244,20 +245,20 @@ export default function MenuPage() {
 
       {/* ── Menu Hero Header ────────────────────────────────────────────── */}
       <header className="menu-header">
-        <div className="container text-center">
+        <ScrollReveal variant="fade-up" className="container text-center">
           <span className="eyebrow">AURELIA MENU</span>
           <h1 className="menu-header__title">Our Culinary Collection</h1>
           <p className="menu-header__subtitle">
             Thoughtfully prepared dishes designed for memorable occasions.
           </p>
           <div className="gold-rule mx-auto mt-4"></div>
-        </div>
+        </ScrollReveal>
       </header>
 
       {/* ── Filter & Search Controls ────────────────────────────────────── */}
       <section className="menu-controls-section" aria-label="Menu filters and search">
         <div className="container">
-          <div className="menu-controls-card card">
+          <ScrollReveal variant="fade-up" delay={80} className="menu-controls-card card">
             {/* Search Row */}
             <div className="menu-search-row">
               <div className="menu-search-input-wrapper">
@@ -348,7 +349,7 @@ export default function MenuPage() {
                 )}
               </div>
             )}
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -383,7 +384,7 @@ export default function MenuPage() {
             </div>
           ) : (
             <div className="menu-catalog-grid">
-              {filteredItems.map((item) => {
+              {filteredItems.map((item, index) => {
                 const isAdded = Boolean(recentlyAdded[item.id]);
                 const imgSrc = getDishImage(item);
                 const formattedPrice =
@@ -392,7 +393,13 @@ export default function MenuPage() {
                     : `Rs. ${item.price}`;
 
                 return (
-                  <article key={item.id} className="menu-catalog-card card">
+                  <ScrollReveal
+                    key={item.id}
+                    as="article"
+                    variant="fade-up"
+                    delay={(index % 3) * 80}
+                    className="menu-catalog-card card"
+                  >
                     {/* 4:3 Image Container */}
                     <div className="menu-catalog-card__media img-placeholder aspect-4-3">
                       <img
@@ -445,7 +452,7 @@ export default function MenuPage() {
                         </button>
                       </div>
                     </div>
-                  </article>
+                  </ScrollReveal>
                 );
               })}
             </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ScrollReveal from "../components/common/ScrollReveal";
 
 const EVENT_CATEGORIES = [
   {
@@ -144,22 +145,28 @@ export default function PublicEventsPage() {
 
       {/* ── Page Hero ────────────────────────────────────────── */}
       <header className="events-header">
-        <div className="container text-center">
+        <ScrollReveal variant="fade-up" className="container text-center">
           <span className="eyebrow">AURELIA EVENTS</span>
           <h1 className="events-header__title">Celebrations, beautifully catered.</h1>
           <p className="events-header__subtitle">
             From intimate gatherings to grand celebrations, we create memorable culinary experiences for every occasion.
           </p>
           <div className="gold-rule mx-auto mt-4"></div>
-        </div>
+        </ScrollReveal>
       </header>
 
       {/* ── Event Category Grid Section ──────────────────────── */}
       <main className="section bg-surface events-catalog-section" id="events-collection">
         <div className="container">
           <div className="events-catalog-grid">
-            {EVENT_CATEGORIES.map((event) => (
-              <article key={event.id} className="event-catalog-card card">
+            {EVENT_CATEGORIES.map((event, index) => (
+              <ScrollReveal
+                key={event.id}
+                as="article"
+                variant="fade-up"
+                delay={(index % 3) * 90}
+                className="event-catalog-card card"
+              >
                 {/* Image Media Container */}
                 <div className="event-catalog-card__media img-placeholder aspect-16-9">
                   <img
@@ -212,7 +219,7 @@ export default function PublicEventsPage() {
                     </Link>
                   </div>
                 </div>
-              </article>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -221,45 +228,45 @@ export default function PublicEventsPage() {
       {/* ── Our Planning Philosophy Section ──────────────────── */}
       <section className="section bg-cream events-process-section">
         <div className="container">
-          <div className="section-header text-center">
+          <ScrollReveal variant="fade-up" className="section-header text-center">
             <span className="eyebrow">OUR APPROACH</span>
             <h2 className="heading-section mt-2">How We Craft Your Occasion</h2>
             <p className="section-subtitle mt-2">
               Every detail is considered, from initial culinary concept to immaculate table restoration.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="events-process-grid mt-10">
-            <div className="events-process-step card">
+            <ScrollReveal variant="fade-up" delay={0} className="events-process-step card">
               <span className="process-step-number">01</span>
               <h3 className="process-step-title">Vision &amp; Menu Design</h3>
               <p className="process-step-desc">
                 We meet with you to understand your celebration&rsquo;s aesthetic, timeline, and the culinary preferences of your guests.
               </p>
-            </div>
+            </ScrollReveal>
 
-            <div className="events-process-step card">
+            <ScrollReveal variant="fade-up" delay={100} className="events-process-step card">
               <span className="process-step-number">02</span>
               <h3 className="process-step-title">Private Tasting Session</h3>
               <p className="process-step-desc">
                 Sample your bespoke dishes and wine pairings in our private tasting salon to refine flavors, presentation, and service style.
               </p>
-            </div>
+            </ScrollReveal>
 
-            <div className="events-process-step card">
+            <ScrollReveal variant="fade-up" delay={200} className="events-process-step card">
               <span className="process-step-number">03</span>
               <h3 className="process-step-title">Flawless Day-of Execution</h3>
               <p className="process-step-desc">
                 Our executive chefs, sommeliers, and floor captains coordinate every course with discreet precision and attentive hospitality.
               </p>
-            </div>
+            </ScrollReveal>
           </div>
 
-          <div className="text-center mt-12">
+          <ScrollReveal variant="fade-up" delay={150} className="text-center mt-12">
             <Link to="/event-booking" className="btn gold lg">
               Book an Event Consultation &rarr;
             </Link>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 

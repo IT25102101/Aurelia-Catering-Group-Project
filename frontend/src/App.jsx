@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import RequireRole from "./components/RequireRole";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 // Public pages
 import HomePage from "./pages/HomePage";
@@ -35,7 +36,9 @@ import CustomerQuotationsPage from "./pages/CustomerQuotationsPage";
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       {/* ---------- Public pages, no login needed ---------- */}
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -134,6 +137,7 @@ export default function App() {
         }
       />
     </Routes>
+    </>
   );
 }
 

@@ -12,11 +12,35 @@ import { API_BASE_URL } from "./config";
 
 const BASE = `${API_BASE_URL}/menu-items`;
 
-// READ (all)
-export async function getMenuItems() {
-  const response = await fetch(BASE);
-  if (!response.ok) throw new Error("Failed to fetch menu-items");
-  return response.json();
+let cachedMenuItems = null;
+let inFlightMenuItemsPromise = null;
+
+export function invalidateMenuItemsCache() {
+  cachedMenuItems = null;
+}
+
+// READ (all) with in-flight deduplication and safe session caching
+export async function getMenuItems(forceRefresh = false) {
+  if (!forceRefresh && cachedMenuItems) {
+    return cachedMenuItems;
+  }
+  if (!forceRefresh && inFlightMenuItemsPromise) {
+    return inFlightMenuItemsPromise;
+  }
+
+  inFlightMenuItemsPromise = (async () => {
+    try {
+      const response = await fetch(BASE);
+      if (!response.ok) throw new Error("Failed to fetch menu-items");
+      const data = await response.json();
+      cachedMenuItems = data;
+      return data;
+    } finally {
+      inFlightMenuItemsPromise = null;
+    }
+  })();
+
+  return inFlightMenuItemsPromise;
 }
 
 // READ (one, by id)
@@ -34,6 +58,7 @@ export async function createMenuItem(menuItemData) {
     body: JSON.stringify(menuItemData),
   });
   if (!response.ok) throw new Error("Failed to create MenuItem");
+  invalidateMenuItemsCache();
   return response.json();
 }
 
@@ -45,6 +70,7 @@ export async function updateMenuItem(id, menuItemData) {
     body: JSON.stringify(menuItemData),
   });
   if (!response.ok) throw new Error(`Failed to update MenuItem with id ${id}`);
+  invalidateMenuItemsCache();
   return response.json();
 }
 
@@ -52,4 +78,5 @@ export async function updateMenuItem(id, menuItemData) {
 export async function deleteMenuItem(id) {
   const response = await fetch(`${BASE}/${id}`, { method: "DELETE" });
   if (!response.ok) throw new Error(`Failed to delete MenuItem with id ${id}`);
+  invalidateMenuItemsCache();
 }

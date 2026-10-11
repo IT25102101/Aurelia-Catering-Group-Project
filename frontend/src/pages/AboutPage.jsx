@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ScrollReveal from "../components/common/ScrollReveal";
 
 const PHILOSOPHY_VALUES = [
   {
@@ -102,21 +103,21 @@ export default function AboutPage() {
 
       {/* ── Page Hero ────────────────────────────────────────── */}
       <header className="about-header">
-        <div className="container text-center">
+        <ScrollReveal variant="fade-up" className="container text-center">
           <span className="eyebrow">AURELIA</span>
           <h1 className="about-header__title">Catering with intention.</h1>
           <p className="about-header__subtitle">
             Thoughtfully crafted food, warm hospitality, and beautifully executed celebrations.
           </p>
           <div className="gold-rule mx-auto mt-4"></div>
-        </div>
+        </ScrollReveal>
       </header>
 
       {/* ── 1. Our Story ──────────────────────────────────────── */}
       <section className="section bg-surface about-story-section" id="story">
         <div className="container">
           <div className="about-story-grid">
-            <div className="about-story-content">
+            <ScrollReveal variant="fade-up" className="about-story-content">
               <span className="eyebrow">OUR STORY</span>
               <h2 className="heading-section mt-2">
                 Crafted for moments worth celebrating.
@@ -132,9 +133,9 @@ export default function AboutPage() {
                   Explore Our Menu Repertoire &rarr;
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
 
-            <div className="about-story-media">
+            <ScrollReveal variant="scale-in" delay={120} className="about-story-media">
               <div className="img-placeholder aspect-4-3 about-media-frame">
                 <img
                   src="/images/home/why-aurelia.jpg"
@@ -143,7 +144,7 @@ export default function AboutPage() {
                   loading="lazy"
                 />
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -151,23 +152,28 @@ export default function AboutPage() {
       {/* ── 2. Our Philosophy ─────────────────────────────────── */}
       <section className="section bg-cream about-philosophy-section" id="philosophy">
         <div className="container">
-          <div className="section-header text-center">
+          <ScrollReveal variant="fade-up" className="section-header text-center">
             <span className="eyebrow">OUR PHILOSOPHY</span>
             <h2 className="heading-section mt-2">Guiding Principles in Everything We Serve</h2>
             <p className="section-subtitle mt-2">
               Four core values define our food, our service, and the standards we hold for every event.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="about-philosophy-grid mt-10">
-            {PHILOSOPHY_VALUES.map((val) => (
-              <div key={val.id} className="about-philosophy-card card">
+            {PHILOSOPHY_VALUES.map((val, index) => (
+              <ScrollReveal
+                key={val.id}
+                variant="fade-up"
+                delay={(index % 4) * 90}
+                className="about-philosophy-card card"
+              >
                 <div className="about-philosophy-icon" aria-hidden="true">
                   {val.icon}
                 </div>
                 <h3 className="about-philosophy-title">{val.title}</h3>
                 <p className="about-philosophy-desc">{val.description}</p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -176,24 +182,29 @@ export default function AboutPage() {
       {/* ── 3. Our Approach ───────────────────────────────────── */}
       <section className="section bg-surface about-approach-section" id="approach">
         <div className="container">
-          <div className="section-header text-center">
+          <ScrollReveal variant="fade-up" className="section-header text-center">
             <span className="eyebrow">THE EXPERIENCE</span>
             <h2 className="heading-section mt-2">Our Seamless Approach</h2>
             <p className="section-subtitle mt-2">
               From our first conversation to the conclusion of your event, we guide you through a clear, stress-free process.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="about-approach-grid mt-10">
-            {APPROACH_STEPS.map((step) => (
-              <div key={step.step} className="about-approach-card card">
+            {APPROACH_STEPS.map((step, index) => (
+              <ScrollReveal
+                key={step.step}
+                variant="fade-up"
+                delay={(index % 4) * 90}
+                className="about-approach-card card"
+              >
                 <div className="about-approach-header">
                   <span className="about-step-num">{step.step}</span>
                   <span className="about-phase-tag">{step.phase}</span>
                 </div>
                 <h3 className="about-approach-title">{step.title}</h3>
                 <p className="about-approach-desc">{step.description}</p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -203,7 +214,7 @@ export default function AboutPage() {
       <section className="section bg-cream about-craft-section" id="craft">
         <div className="container">
           <div className="about-craft-grid">
-            <div className="about-craft-media">
+            <ScrollReveal variant="scale-in" className="about-craft-media">
               <div className="img-placeholder aspect-16-9 about-media-frame">
                 <img
                   src="/images/home/experience-aurelia.jpg"
@@ -212,9 +223,9 @@ export default function AboutPage() {
                   loading="lazy"
                 />
               </div>
-            </div>
+            </ScrollReveal>
 
-            <div className="about-craft-content">
+            <ScrollReveal variant="fade-up" delay={120} className="about-craft-content">
               <span className="eyebrow">CULINARY CRAFT</span>
               <h2 className="heading-section mt-2">Rooted in Passion and Precision</h2>
               <p className="about-text mt-4">
@@ -223,7 +234,7 @@ export default function AboutPage() {
               <p className="about-text mt-3">
                 From delicate hand-passed canapés to centerpiece carvery buffets and late-night dessert ateliers, each element is prepared fresh on-site to preserve flavor and visual beauty.
               </p>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -231,17 +242,23 @@ export default function AboutPage() {
       {/* ── 5. Events We Serve ────────────────────────────────── */}
       <section className="section bg-surface about-events-section" id="events-served">
         <div className="container">
-          <div className="section-header text-center">
+          <ScrollReveal variant="fade-up" className="section-header text-center">
             <span className="eyebrow">OCCASIONS</span>
             <h2 className="heading-section mt-2">Celebrations We Cater</h2>
             <p className="section-subtitle mt-2">
               Explore how we tailor our culinary and hospitality services for different styles of gatherings.
             </p>
-          </div>
+          </ScrollReveal>
 
           <div className="about-occasions-grid mt-10">
-            {OCCASIONS.map((occ) => (
-              <article key={occ.id} className="about-occasion-card card">
+            {OCCASIONS.map((occ, index) => (
+              <ScrollReveal
+                key={occ.id}
+                as="article"
+                variant="fade-up"
+                delay={(index % 4) * 90}
+                className="about-occasion-card card"
+              >
                 <div className="about-occasion-media img-placeholder aspect-16-9">
                   <img
                     src={occ.image}
@@ -257,7 +274,7 @@ export default function AboutPage() {
                     Explore Event Details &rarr;
                   </Link>
                 </div>
-              </article>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -266,7 +283,7 @@ export default function AboutPage() {
       {/* ── 6. Call To Action ─────────────────────────────────── */}
       <section className="section bg-cream about-cta-section">
         <div className="container">
-          <div className="about-cta-card card text-center">
+          <ScrollReveal variant="fade-up" className="about-cta-card card text-center">
             <span className="eyebrow">BEGIN YOUR PLANNING</span>
             <h2 className="heading-section mt-2">Let&rsquo;s create something memorable.</h2>
             <p className="section-subtitle mt-3 mx-auto" style={{ maxWidth: 580 }}>
@@ -280,7 +297,7 @@ export default function AboutPage() {
                 Plan Your Event &rarr;
               </Link>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 

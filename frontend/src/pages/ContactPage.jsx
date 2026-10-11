@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ScrollReveal from "../components/common/ScrollReveal";
 
 const EVENT_TYPES = [
   "Wedding",
@@ -86,14 +87,14 @@ export default function ContactPage() {
 
       {/* ── Page Hero ────────────────────────────────────────── */}
       <header className="contact-header">
-        <div className="container text-center">
+        <ScrollReveal variant="fade-up" className="container text-center">
           <span className="eyebrow">AURELIA CONTACT</span>
           <h1 className="contact-header__title">Let&rsquo;s plan something memorable.</h1>
           <p className="contact-header__subtitle">
             Tell us about your celebration and our team will help shape the perfect catering experience.
           </p>
           <div className="gold-rule mx-auto mt-4"></div>
-        </div>
+        </ScrollReveal>
       </header>
 
       {/* ── Main Two-Column Section ──────────────────────────── */}
@@ -102,7 +103,7 @@ export default function ContactPage() {
           <div className="contact-layout">
 
             {/* ── Left Column: Contact Information & Location ── */}
-            <aside className="contact-info-panel">
+            <ScrollReveal as="aside" variant="fade-up" className="contact-info-panel">
               <div className="contact-info-card card">
                 <span className="eyebrow">GET IN TOUCH</span>
                 <h2 className="contact-info__title mt-2">Atelier &amp; Concierge</h2>
@@ -181,10 +182,10 @@ export default function ContactPage() {
                   </div>
                 </div>
               </div>
-            </aside>
+            </ScrollReveal>
 
             {/* ── Right Column: Enquiry Form ──────────────────── */}
-            <section className="contact-form-panel">
+            <ScrollReveal as="section" variant="fade-up" delay={120} className="contact-form-panel">
               <div className="contact-form-card card">
                 <span className="eyebrow">DIRECT INQUIRY</span>
                 <h2 className="contact-form__title mt-2">Send an Enquiry</h2>
@@ -405,7 +406,7 @@ export default function ContactPage() {
                   </form>
                 )}
               </div>
-            </section>
+            </ScrollReveal>
 
           </div>
         </div>
