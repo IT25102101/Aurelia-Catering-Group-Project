@@ -1,0 +1,25 @@
+TestSuite,TestClassOrFile,Runner,TestsRun,Failures,Errors,Skipped,TimeSeconds,Status
+Backend,AuthControllerTest.java,JUnit 5,8,0,0,0,1.250,PASS
+Backend,CateringPackageControllerTest.java,JUnit 5 / MockMvc,12,0,0,0,0.280,PASS
+Backend,CateringPackageFactoryTest.java,JUnit 5,6,0,0,0,0.015,PASS
+Backend,CateringPackageServiceTest.java,JUnit 5 / Mockito,12,0,0,0,0.082,PASS
+Backend,CrossModuleIntegrationTest.java,JUnit 5,1,0,0,0,0.018,PASS
+Backend,DatabaseIntegrationTest.java,JUnit 5 / JDBC,4,0,0,0,0.045,PASS
+Backend,DeliveryControllerTest.java,JUnit 5 / MockMvc,3,0,0,0,0.042,PASS
+Backend,InventoryItemControllerTest.java,JUnit 5 / MockMvc,3,0,0,0,0.040,PASS
+Backend,MenuItemControllerTest.java,JUnit 5 / MockMvc,7,0,0,0,0.098,PASS
+Backend,OrderControllerTest.java,JUnit 5 / MockMvc,7,0,0,0,0.158,PASS
+Backend,PackageMenuItemControllerTest.java,JUnit 5 / MockMvc,6,0,0,0,0.067,PASS
+Backend,PackagePricingStrategyTest.java,JUnit 5,5,0,0,0,0.018,PASS
+Backend,PasswordUtilTest.java,JUnit 5,5,0,0,0,0.245,PASS
+Backend,PaymentControllerTest.java,JUnit 5 / MockMvc,3,0,0,0,0.044,PASS
+Backend,QuotationControllerTest.java,JUnit 5 / MockMvc,5,0,0,0,0.093,PASS
+Backend,StaffControllerTest.java,JUnit 5 / MockMvc,3,0,0,0,0.058,PASS
+Backend,StrategyEdgeCaseTest.java,JUnit 5,12,0,0,0,0.024,PASS
+Frontend,apiClients.test.js,Vitest,10,0,0,0,0.016,PASS
+Frontend,AuthContext.test.jsx,Vitest / RTL,3,0,0,0,0.076,PASS
+Frontend,RequireRole.test.jsx,Vitest / RTL,4,0,0,0,0.081,PASS
+Frontend,Navbar.test.jsx,Vitest / RTL,3,0,0,0,0.157,PASS
+Frontend,LoginPage.test.jsx,Vitest / RTL,4,0,0,0,0.441,PASS
+Frontend,CateringPackagesPage.test.jsx,Vitest / RTL,9,0,0,0,1.174,PASS
+TOTAL,23 Test Suites,Multi-Runner,135,0,0,0,13.924,100% PASS

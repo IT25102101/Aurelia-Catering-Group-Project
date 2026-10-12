@@ -1,0 +1,81 @@
+TestCaseID,Module,Feature,TestType,Priority,SourceReference,Status
+TC-PKG-001,Catering Package Management,Factory Pattern Wedding Creation,Unit,High,PackageFactory.java,PASS
+TC-PKG-002,Catering Package Management,Factory Pattern Birthday Creation,Unit,High,PackageFactory.java,PASS
+TC-PKG-003,Catering Package Management,Factory Pattern Corporate Creation,Unit,High,PackageFactory.java,PASS
+TC-PKG-004,Catering Package Management,Factory Pattern Gala Creation,Unit,High,PackageFactory.java,PASS
+TC-PKG-005,Catering Package Management,Factory Pattern Fallback General Creation,Unit,High,PackageFactory.java,PASS
+TC-PKG-006,Catering Package Management,Factory Pattern Null Unknown Handling,Unit,Medium,PackageFactory.java,PASS
+TC-PKG-007,Catering Package Management,Fixed Strategy Flat Fee,Unit,High,FixedPackagePricingStrategy.java,PASS
+TC-PKG-008,Catering Package Management,Per-Guest Sub-Tier 99 Guests,BVA,High,PerGuestPackagePricingStrategy.java,PASS
+TC-PKG-009,Catering Package Management,Per-Guest 5% Discount 100 Guests,BVA,Critical,PerGuestPackagePricingStrategy.java,PASS
+TC-PKG-010,Catering Package Management,Per-Guest Tier 1 Boundary 199 Guests,BVA,High,PerGuestPackagePricingStrategy.java,PASS
+TC-PKG-011,Catering Package Management,Per-Guest 10% Discount 200 Guests,BVA,Critical,PerGuestPackagePricingStrategy.java,PASS
+TC-PKG-012,Catering Package Management,Per-Guest Tier 2 Boundary 499 Guests,BVA,High,PerGuestPackagePricingStrategy.java,PASS
+TC-PKG-013,Catering Package Management,Per-Guest 15% Discount 500 Guests,BVA,Critical,PerGuestPackagePricingStrategy.java,PASS
+TC-PKG-014,Catering Package Management,Occasion Strategy Wedding Luxury 1.25x,Unit,High,OccasionTieredPricingStrategy.java,PASS
+TC-PKG-015,Catering Package Management,Occasion Strategy Corporate Concession 0.95x,Unit,High,OccasionTieredPricingStrategy.java,PASS
+TC-PKG-016,Catering Package Management,Food-Value Strategy Costing +25% Margin,Unit,High,FoodValueCostingStrategy.java,PASS
+TC-PKG-017,Catering Package Management,Food-Value Fallback Zero Dishes,Unit,Medium,FoodValueCostingStrategy.java,PASS
+TC-PKG-018,Catering Package Management,Strategy Edge Case Zero Guests Clamp,Robustness,High,StrategyEdgeCaseTest.java,PASS
+TC-PKG-019,Catering Package Management,Strategy Edge Case Negative Guests Clamp,Robustness,High,StrategyEdgeCaseTest.java,PASS
+TC-PKG-020,Catering Package Management,Service Package Retrieval List,Service,High,CateringPackageService.java,PASS
+TC-PKG-021,Catering Package Management,Service Package Retrieval By ID,Service,High,CateringPackageService.java,PASS
+TC-PKG-022,Catering Package Management,Service Package Creation via Factory,Service,High,CateringPackageService.java,PASS
+TC-PKG-023,Catering Package Management,Service Package Name Validation,Service,High,CateringPackageService.java,PASS
+TC-PKG-024,Catering Package Management,Service Package Price Validation,Service,High,CateringPackageService.java,PASS
+TC-PKG-025,Catering Package Management,Controller GET All Packages,MockMvc,High,CateringPackageController.java,PASS
+TC-PKG-026,Catering Package Management,Controller GET Package By ID,MockMvc,High,CateringPackageController.java,PASS
+TC-PKG-027,Catering Package Management,Controller POST Create Package,MockMvc,High,CateringPackageController.java,PASS
+TC-PKG-028,Catering Package Management,Controller POST Bad Request Empty Name,MockMvc,High,CateringPackageController.java,PASS
+TC-PKG-029,Catering Package Management,Controller POST Bad Request Negative Price,MockMvc,High,CateringPackageController.java,PASS
+TC-PKG-030,Catering Package Management,Controller PUT Update Package,MockMvc,Medium,CateringPackageController.java,PASS
+TC-PKG-031,Catering Package Management,Controller DELETE Package,MockMvc,Medium,CateringPackageController.java,PASS
+TC-PKG-032,Catering Package Management,Controller GET Strategies Metadata,MockMvc,High,CateringPackageController.java,PASS
+TC-PKG-033,Catering Package Management,Controller POST Calculate Strategy Price,MockMvc,High,CateringPackageController.java,PASS
+TC-PKG-034,Catering Package Management,Junction Controller GET Assigned Items,MockMvc,High,PackageMenuItemController.java,PASS
+TC-PKG-035,Catering Package Management,Junction Controller POST Assign Item,MockMvc,High,PackageMenuItemController.java,PASS
+TC-PKG-036,Catering Package Management,Junction Controller POST Duplicate 409 Conflict,MockMvc,High,PackageMenuItemController.java,PASS
+TC-PKG-037,Catering Package Management,Junction Controller DELETE Unassign Item,MockMvc,High,PackageMenuItemController.java,PASS
+TC-PKG-038,Catering Package Management,Frontend Package Page Header & List Render,RTL,High,CateringPackagesPage.test.jsx,PASS
+TC-PKG-039,Catering Package Management,Frontend Package Title Required Validation,RTL,High,CateringPackagesPage.test.jsx,PASS
+TC-PKG-040,Catering Package Management,Frontend Package Negative Price Validation,RTL,High,CateringPackagesPage.test.jsx,PASS
+TC-PKG-041,Catering Package Management,Frontend Package Creation Form Submit,RTL,High,CateringPackagesPage.test.jsx,PASS
+TC-PKG-042,Catering Package Management,Frontend Assigned Dishes Table Display,RTL,High,CateringPackagesPage.test.jsx,PASS
+TC-PKG-043,Catering Package Management,Frontend Dish Assignment From Catalog,RTL,High,CateringPackagesPage.test.jsx,PASS
+TC-PKG-044,Catering Package Management,Frontend Duplicate 409 Conflict Alert,RTL,High,CateringPackagesPage.test.jsx,PASS
+TC-PKG-045,Catering Package Management,Frontend Dynamic Pricing Simulator Breakdown,RTL,High,CateringPackagesPage.test.jsx,PASS
+TC-PKG-046,Catering Package Management,Frontend Delete Package Confirmation,RTL,Medium,CateringPackagesPage.test.jsx,PASS
+TC-AUTH-001,Authentication,PBKDF2 Password Hashing Format,Unit,High,PasswordUtil.java,PASS
+TC-AUTH-002,Authentication,PBKDF2 Password Verification Matching,Unit,High,PasswordUtil.java,PASS
+TC-AUTH-003,Authentication,PBKDF2 Password Verification NonMatching,Unit,High,PasswordUtil.java,PASS
+TC-AUTH-004,Authentication,Legacy Plaintext Auto Upgrade,Unit,High,PasswordUtil.java,PASS
+TC-AUTH-005,Authentication,Controller POST Login Success,MockMvc,High,AuthController.java,PASS
+TC-AUTH-006,Authentication,Controller POST Login Invalid Credentials 401,MockMvc,High,AuthController.java,PASS
+TC-AUTH-007,Authentication,Controller POST Login Inactive Account 403,MockMvc,High,AuthController.java,PASS
+TC-AUTH-008,Authentication,Controller POST Logout,MockMvc,Medium,AuthController.java,PASS
+TC-AUTH-009,Authentication,Frontend AuthContext Session State,RTL,High,AuthContext.test.jsx,PASS
+TC-AUTH-010,Authentication,Frontend RequireRole Route Guard Redirect,RTL,High,RequireRole.test.jsx,PASS
+TC-AUTH-011,Authentication,Frontend RequireRole 403 Access Denied,RTL,High,RequireRole.test.jsx,PASS
+TC-AUTH-012,Authentication,Frontend LoginPage Form Submission,RTL,High,LoginPage.test.jsx,PASS
+TC-MENU-001,Catering Menu Management,Controller GET Menu Items,MockMvc,High,MenuItemController.java,PASS
+TC-MENU-002,Catering Menu Management,Controller POST Create Menu Item,MockMvc,High,MenuItemController.java,PASS
+TC-MENU-003,Catering Menu Management,Controller POST Reject Negative Price,MockMvc,High,MenuItemController.java,PASS
+TC-MENU-004,Catering Menu Management,Controller PUT Update Menu Item,MockMvc,Medium,MenuItemController.java,PASS
+TC-MENU-005,Catering Menu Management,Controller DELETE Menu Item,MockMvc,Medium,MenuItemController.java,PASS
+TC-ORDER-001,Order Management,Controller GET All Orders,MockMvc,High,OrderController.java,PASS
+TC-ORDER-002,Order Management,Controller POST Create Order,MockMvc,High,OrderController.java,PASS
+TC-ORDER-003,Order Management,Controller PUT Update Order Status,MockMvc,High,OrderController.java,PASS
+TC-PAY-001,Quotation and Payment,Controller GET Quotations,MockMvc,High,QuotationController.java,PASS
+TC-PAY-002,Quotation and Payment,Controller POST Payment Advance Deposit,MockMvc,High,PaymentController.java,PASS
+TC-PAY-003,Quotation and Payment,Controller POST Payment Settlement,MockMvc,High,PaymentController.java,PASS
+TC-INV-001,Inventory Management,Controller GET Inventory Stock,MockMvc,Medium,InventoryItemController.java,PASS
+TC-INV-002,Inventory Management,Controller PUT Update Inventory Quantity,MockMvc,Medium,InventoryItemController.java,PASS
+TC-STAFF-001,Staff Management,Controller GET Staff List,MockMvc,Medium,StaffController.java,PASS
+TC-STAFF-002,Staff Management,Controller POST Register Staff Member,MockMvc,Medium,StaffController.java,PASS
+TC-DEL-001,Delivery Management,Controller GET Delivery Assignments,MockMvc,Medium,DeliveryController.java,PASS
+TC-DEL-002,Delivery Management,Controller POST Dispatch Order Delivery,MockMvc,Medium,DeliveryController.java,PASS
+TC-INT-001,Cross-Module Integration,Full Pipeline Auth Menu Package Price Order Quotation Payment,Integration,High,CrossModuleIntegrationTest.java,PASS
+TC-DB-001,Database Testing,SQL Server Instance Connectivity Verification,JDBC,High,DatabaseIntegrationTest.java,PASS
+TC-DB-002,Database Testing,SQL Server CateringPackage Table Schema Verification,JDBC,High,DatabaseIntegrationTest.java,PASS
+TC-DB-003,Database Testing,SQL Server PACKAGE_MENU_ITEM Junction Table Verification,JDBC,High,DatabaseIntegrationTest.java,PASS
+TC-DB-004,Database Testing,SQL Server Foreign Key Constraints Verification,JDBC,High,DatabaseIntegrationTest.java,PASS
