@@ -5,6 +5,8 @@ import com.aurelia.catering.dao.StaffAccountDao;
 import com.aurelia.catering.model.CustomerAccount;
 import com.aurelia.catering.model.StaffAccount;
 import com.aurelia.catering.util.PasswordUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     private StaffAccountDao staffAccountDao;
@@ -47,47 +51,65 @@ public class AuthController {
         identifier = identifier.trim();
 
         // 1. Check STAFF_ACCOUNT first (supports login by Username or Staff Email)
-        StaffAccount staff = staffAccountDao.findByUsernameOrEmail(identifier);
-        if (staff != null) {
-            if (PasswordUtil.matches(password, staff.getPasswordHash())) {
-                if (!"Active".equalsIgnoreCase(staff.getAccountStatus())) {
-                    return ResponseEntity.status(401).body("Your staff account is currently inactive. Please contact administration.");
-                }
-                if (PasswordUtil.needsUpgrade(staff.getPasswordHash())) {
-                    staffAccountDao.updatePassword(staff.getAccountId(), password); // re-save as a hash
-                }
-                staffAccountDao.updateLastLogin(staff.getAccountId());
+        try {
+            StaffAccount staff = staffAccountDao.findByUsernameOrEmail(identifier);
+            if (staff != null) {
+                if (PasswordUtil.matches(password, staff.getPasswordHash())) {
+                    if (!"Active".equalsIgnoreCase(staff.getAccountStatus())) {
+                        return ResponseEntity.status(401).body("Your staff account is currently inactive. Please contact administration.");
+                    }
+                    if (PasswordUtil.needsUpgrade(staff.getPasswordHash())) {
+                        staffAccountDao.updatePassword(staff.getAccountId(), password); // re-save as a hash
+                    }
+                    staffAccountDao.updateLastLogin(staff.getAccountId());
 
-                Map<String, Object> response = new HashMap<>();
-                response.put("id", staff.getStaffId());
-                response.put("fullName", staff.getStaffName());
-                response.put("email", staff.getStaffEmail());
-                response.put("role", staff.getStaffRole());
-                response.put("accountType", "STAFF");
-                return ResponseEntity.ok(response);
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("id", staff.getStaffId());
+                    response.put("fullName", staff.getStaffName());
+                    response.put("email", staff.getStaffEmail());
+                    response.put("role", staff.getStaffRole());
+                    response.put("accountType", "STAFF");
+                    return ResponseEntity.ok(response);
+                }
             }
+        } catch (Exception e) {
+            log.error("Error during staff authentication lookup for '{}': {}", identifier, e.getMessage(), e);
+            String msg = e.getMessage() != null ? e.getMessage() : "";
+            if (msg.contains("Staff_Account") || msg.contains("Invalid object name")) {
+                return ResponseEntity.status(503).body("Database setup incomplete: The STAFF_ACCOUNT table does not exist in the database. Please execute the authentication setup SQL script in SSMS.");
+            }
+            return ResponseEntity.status(500).body("Authentication error: " + e.getMessage());
         }
 
         // 2. Check CUSTOMER_ACCOUNT (login by Customer Email)
-        CustomerAccount customer = customerAccountDao.findByCustomerEmail(identifier);
-        if (customer != null) {
-            if (PasswordUtil.matches(password, customer.getPasswordHash())) {
-                if (!"Active".equalsIgnoreCase(customer.getAccountStatus())) {
-                    return ResponseEntity.status(401).body("Your customer account is currently inactive.");
-                }
-                if (PasswordUtil.needsUpgrade(customer.getPasswordHash())) {
-                    customerAccountDao.updatePassword(customer.getAccountId(), password); // re-save as a hash
-                }
-                customerAccountDao.updateLastLogin(customer.getAccountId());
+        try {
+            CustomerAccount customer = customerAccountDao.findByCustomerEmail(identifier);
+            if (customer != null) {
+                if (PasswordUtil.matches(password, customer.getPasswordHash())) {
+                    if (!"Active".equalsIgnoreCase(customer.getAccountStatus())) {
+                        return ResponseEntity.status(401).body("Your customer account is currently inactive.");
+                    }
+                    if (PasswordUtil.needsUpgrade(customer.getPasswordHash())) {
+                        customerAccountDao.updatePassword(customer.getAccountId(), password); // re-save as a hash
+                    }
+                    customerAccountDao.updateLastLogin(customer.getAccountId());
 
-                Map<String, Object> response = new HashMap<>();
-                response.put("id", customer.getCustomerId());
-                response.put("fullName", customer.getCustomerName());
-                response.put("email", customer.getCustomerEmail());
-                response.put("role", "CUSTOMER");
-                response.put("accountType", "CUSTOMER");
-                return ResponseEntity.ok(response);
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("id", customer.getCustomerId());
+                    response.put("fullName", customer.getCustomerName());
+                    response.put("email", customer.getCustomerEmail());
+                    response.put("role", "CUSTOMER");
+                    response.put("accountType", "CUSTOMER");
+                    return ResponseEntity.ok(response);
+                }
             }
+        } catch (Exception e) {
+            log.error("Error during customer authentication lookup for '{}': {}", identifier, e.getMessage(), e);
+            String msg = e.getMessage() != null ? e.getMessage() : "";
+            if (msg.contains("Customer_Account") || msg.contains("Invalid object name") || msg.contains("Customer")) {
+                return ResponseEntity.status(503).body("Database setup incomplete: The CUSTOMER_ACCOUNT table does not exist in the database. Please execute the authentication setup SQL script in SSMS.");
+            }
+            return ResponseEntity.status(500).body("Authentication error: " + e.getMessage());
         }
 
         // 3. If neither credentials matched
