@@ -12,6 +12,8 @@ public class Staff {
     private String email;
     private String role;
 
+    private Boolean available = true;
+
     public Staff() {
     }
 
@@ -21,6 +23,7 @@ public class Staff {
         this.phone = phone;
         this.email = email;
         this.role = role;
+        this.available = true;
     }
 
     public Integer getId() {
@@ -79,4 +82,13 @@ public class Staff {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public Boolean getAvailable() {
+        return available != null ? available : true;
+    }
+
+    public void setAvailable(Boolean available) {
+        this.available = available != null ? available : true;
+    }
 }
+

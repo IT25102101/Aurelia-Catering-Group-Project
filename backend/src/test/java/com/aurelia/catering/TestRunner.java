@@ -56,6 +56,26 @@ public class TestRunner {
             failed++;
         }
 
+        // 3. Staff Strategy Pattern Tests
+        try {
+            StaffStrategyPatternTest staffStrategyTest = new StaffStrategyPatternTest();
+            staffStrategyTest.setUp();
+            staffStrategyTest.testKitchenStrategy();
+            staffStrategyTest.setUp();
+            staffStrategyTest.testDeliveryStrategy();
+            staffStrategyTest.setUp();
+            staffStrategyTest.testSupervisorStrategy();
+            staffStrategyTest.setUp();
+            staffStrategyTest.testContextDynamicResolution();
+
+            System.out.println(" [PASS] StaffStrategyPatternTest (4/4 assertions passed)");
+            passed += 4;
+        } catch (Throwable t) {
+            System.err.println(" [FAIL] StaffStrategyPatternTest: " + t.getMessage());
+            t.printStackTrace();
+            failed++;
+        }
+
         System.out.println("==================================================");
         System.out.println(" TEST SUMMARY: " + passed + " PASSED, " + failed + " FAILED");
         System.out.println("==================================================");

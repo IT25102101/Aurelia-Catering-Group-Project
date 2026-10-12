@@ -69,11 +69,28 @@ public class StaffDao {
                 }
             }
 
+            // Ensure email satisfies the CK_STAFF_EMAIL constraint
+            String email = staff.getEmail();
+            if (email == null || email.trim().isEmpty() || !email.contains("@")) {
+                String cleanName = staff.getName() != null ? staff.getName().toLowerCase().replaceAll("[^a-z0-9]", ".") : "staff";
+                cleanName = cleanName.replaceAll("\\.+", ".").replaceAll("^\\.|\\.$", "");
+                if (cleanName.isEmpty()) cleanName = "staff" + newId;
+                email = cleanName + "@aurelia.com";
+                staff.setEmail(email);
+            }
+
+            // Ensure phone satisfies CK_STAFF_PHONE (only digits, +, spaces, length >= 9)
+            String phone = staff.getPhone();
+            if (phone == null || phone.trim().isEmpty()) {
+                phone = "0770000000";
+                staff.setPhone(phone);
+            }
+
             try (PreparedStatement stmt = conn.prepareStatement(insertSql)) {
                 stmt.setInt(1, newId);
                 stmt.setString(2, staff.getName());
-                stmt.setString(3, staff.getPhone());
-                stmt.setString(4, staff.getEmail());
+                stmt.setString(3, phone);
+                stmt.setString(4, email);
                 stmt.setString(5, staff.getRole());
                 stmt.executeUpdate();
             }
@@ -89,12 +106,34 @@ public class StaffDao {
     public Staff update(int id, Staff staff) {
         String sql = "UPDATE Staff SET Name = ?, Phone = ?, Email = ?, Role = ? WHERE StaffID = ?";
 
+        // Ensure email satisfies the CK_STAFF_EMAIL constraint
+        String email = staff.getEmail();
+        if (email == null || email.trim().isEmpty() || !email.contains("@")) {
+            Staff existing = getById(id);
+            if (existing != null && existing.getEmail() != null) {
+                email = existing.getEmail();
+            } else {
+                String cleanName = staff.getName() != null ? staff.getName().toLowerCase().replaceAll("[^a-z0-9]", ".") : "staff";
+                cleanName = cleanName.replaceAll("\\.+", ".").replaceAll("^\\.|\\.$", "");
+                email = cleanName + "@aurelia.com";
+            }
+            staff.setEmail(email);
+        }
+
+        // Ensure phone satisfies CK_STAFF_PHONE
+        String phone = staff.getPhone();
+        if (phone == null || phone.trim().isEmpty()) {
+            Staff existing = getById(id);
+            phone = (existing != null && existing.getPhone() != null) ? existing.getPhone() : "0770000000";
+            staff.setPhone(phone);
+        }
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, staff.getName());
-            stmt.setString(2, staff.getPhone());
-            stmt.setString(3, staff.getEmail());
+            stmt.setString(2, phone);
+            stmt.setString(3, email);
             stmt.setString(4, staff.getRole());
             stmt.setInt(5, id);
             stmt.executeUpdate();

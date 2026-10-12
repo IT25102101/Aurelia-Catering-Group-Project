@@ -53,3 +53,29 @@ export async function deleteStaff(id) {
   const response = await fetch(`${BASE}/${id}`, { method: "DELETE" });
   if (!response.ok) throw new Error(`Failed to delete Staff with id ${id}`);
 }
+
+// STRATEGY PATTERN: EVALUATE ROLE POLICY & CLEARANCE
+export async function getStaffPolicy(id) {
+  const response = await fetch(`${BASE}/${id}/policy`);
+  if (!response.ok) throw new Error(`Failed to evaluate policy for Staff with id ${id}`);
+  return response.json();
+}
+
+// STRATEGY PATTERN: CALCULATE SHIFT COMPENSATION & OVERTIME
+export async function calculateStaffCompensation(id, regularHours = 40, overtimeHours = 0) {
+  const params = new URLSearchParams({
+    regularHours: String(regularHours),
+    overtimeHours: String(overtimeHours),
+  });
+  const response = await fetch(`${BASE}/${id}/compensation?${params}`);
+  if (!response.ok) throw new Error(`Failed to calculate compensation for Staff with id ${id}`);
+  return response.json();
+}
+
+// STRATEGY PATTERN: LIST ALL ROLE POLICIES
+export async function getStaffPolicies() {
+  const response = await fetch(`${BASE}/policies`);
+  if (!response.ok) throw new Error("Failed to load staff policies");
+  return response.json();
+}
+

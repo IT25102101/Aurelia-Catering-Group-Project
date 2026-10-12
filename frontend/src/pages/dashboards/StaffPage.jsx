@@ -5,6 +5,8 @@ import {
   createStaff,
   updateStaff,
   deleteStaff,
+  getStaffPolicy,
+  calculateStaffCompensation,
 } from "../../api/staffApi";
 
 const STAFF_ROLES = [
@@ -27,6 +29,10 @@ const emptyForm = {
  * CRUD screen for "6.6 Staff Management".
  * Features role selection, availability badges, validation, loading/empty states,
  * and reliable backend CRUD integration.
+ *
+ * Design Patterns demonstrated:
+ * 1. DAO Pattern: Interacts with StaffDao/StaffService through REST endpoints.
+ * 2. Strategy Pattern: Dynamically inspects role policies, clearances, allowances, and calculates shift pay.
  */
 export default function StaffPage() {
   const [items, setItems] = useState([]);
@@ -36,6 +42,14 @@ export default function StaffPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+
+  // Strategy Pattern States
+  const [activePolicyStaff, setActivePolicyStaff] = useState(null);
+  const [policyResult, setPolicyResult] = useState(null);
+  const [compensationResult, setCompensationResult] = useState(null);
+  const [calcRegularHours, setCalcRegularHours] = useState(40);
+  const [calcOvertimeHours, setCalcOvertimeHours] = useState(5);
+  const [policyLoading, setPolicyLoading] = useState(false);
 
   const loadItems = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
@@ -128,6 +142,47 @@ export default function StaffPage() {
     } catch (err) {
       setError("Failed to delete staff member: " + (err.message || "Server error"));
     }
+  }
+
+  async function handleOpenPolicy(staff) {
+    setActivePolicyStaff(staff);
+    setPolicyLoading(true);
+    try {
+      const [policy, comp] = await Promise.all([
+        getStaffPolicy(staff.id),
+        calculateStaffCompensation(staff.id, calcRegularHours, calcOvertimeHours),
+      ]);
+      setPolicyResult(policy);
+      setCompensationResult(comp);
+    } catch (err) {
+      setError("Failed to evaluate role strategy policy: " + (err.message || "Server error"));
+    } finally {
+      setPolicyLoading(false);
+    }
+  }
+
+  async function handleRecalculateComp(e) {
+    e.preventDefault();
+    if (!activePolicyStaff) return;
+    setPolicyLoading(true);
+    try {
+      const comp = await calculateStaffCompensation(
+        activePolicyStaff.id,
+        calcRegularHours,
+        calcOvertimeHours
+      );
+      setCompensationResult(comp);
+    } catch (err) {
+      setError("Calculation failed: " + (err.message || "Server error"));
+    } finally {
+      setPolicyLoading(false);
+    }
+  }
+
+  function handleClosePolicyModal() {
+    setActivePolicyStaff(null);
+    setPolicyResult(null);
+    setCompensationResult(null);
   }
 
   function handleCancel() {
@@ -305,6 +360,20 @@ export default function StaffPage() {
                           Edit
                         </button>
                         <button
+                          type="button"
+                          className="btn sm"
+                          style={{
+                            marginLeft: 6,
+                            background: "rgba(212, 175, 55, 0.15)",
+                            border: "1px solid var(--gold, #d4af37)",
+                            color: "var(--gold, #d4af37)",
+                            fontWeight: 600,
+                          }}
+                          onClick={() => handleOpenPolicy(item)}
+                        >
+                          Policy &amp; Pay
+                        </button>
+                        <button
                           className="btn danger sm"
                           style={{ marginLeft: 6 }}
                           onClick={() => handleDelete(item.id, item.name)}
@@ -317,6 +386,214 @@ export default function StaffPage() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* ── Strategy Pattern: Role Policy & Compensation Modal ───────── */}
+        {activePolicyStaff && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.75)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1000,
+              padding: "20px",
+              backdropFilter: "blur(4px)",
+            }}
+            onClick={handleClosePolicyModal}
+          >
+            <div
+              className="card"
+              style={{
+                maxWidth: "680px",
+                width: "100%",
+                maxHeight: "90vh",
+                overflowY: "auto",
+                background: "var(--card-bg, #1a1a1a)",
+                border: "1px solid var(--gold, #d4af37)",
+                borderRadius: "10px",
+                padding: "24px",
+                position: "relative",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "12px", marginBottom: "16px" }}>
+                <div>
+                  <h3 style={{ margin: 0, color: "var(--gold, #d4af37)" }}>
+                    {policyResult ? policyResult.policyName : "Staff Role Policy Evaluation"}
+                  </h3>
+                  <div style={{ fontSize: "0.85rem", color: "var(--muted, #aaa)", marginTop: "4px" }}>
+                    Staff Member: <strong>{activePolicyStaff.name}</strong> (#{activePolicyStaff.id}) &bull; Assigned Role: <strong>{activePolicyStaff.role}</strong>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn secondary sm"
+                  onClick={handleClosePolicyModal}
+                  style={{ minWidth: "32px", padding: "4px 10px" }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {policyLoading && !policyResult ? (
+                <div style={{ padding: "30px", textAlign: "center", color: "var(--muted, #888)" }}>
+                  Evaluating role strategy via Spring DI...
+                </div>
+              ) : (
+                <>
+                  {policyResult && (
+                    <div style={{ marginBottom: "20px" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", marginBottom: "16px" }}>
+                        <div style={{ background: "rgba(255,255,255,0.04)", padding: "10px", borderRadius: "6px", textAlign: "center" }}>
+                          <div style={{ fontSize: "0.75rem", color: "var(--muted, #888)" }}>Base Rate</div>
+                          <div style={{ fontSize: "1.1rem", fontWeight: "bold", color: "var(--gold, #d4af37)" }}>
+                            {policyResult.baseHourlyRate.toFixed(2)} LKR/h
+                          </div>
+                        </div>
+                        <div style={{ background: "rgba(255,255,255,0.04)", padding: "10px", borderRadius: "6px", textAlign: "center" }}>
+                          <div style={{ fontSize: "0.75rem", color: "var(--muted, #888)" }}>Overtime Rate</div>
+                          <div style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#4cd137" }}>
+                            {policyResult.overtimeMultiplier.toFixed(2)}x
+                          </div>
+                        </div>
+                        <div style={{ background: "rgba(255,255,255,0.04)", padding: "10px", borderRadius: "6px", textAlign: "center" }}>
+                          <div style={{ fontSize: "0.75rem", color: "var(--muted, #888)" }}>Role Allowance</div>
+                          <div style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#fbc531" }}>
+                            {policyResult.specialAllowance.toFixed(2)} LKR
+                          </div>
+                        </div>
+                        <div style={{ background: "rgba(255,255,255,0.04)", padding: "10px", borderRadius: "6px", textAlign: "center" }}>
+                          <div style={{ fontSize: "0.75rem", color: "var(--muted, #888)" }}>Max Shift</div>
+                          <div style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#e84118" }}>
+                            {policyResult.maxShiftHours} hrs/shift
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Clearances */}
+                      <div style={{ marginBottom: "12px" }}>
+                        <strong style={{ fontSize: "0.85rem", color: "var(--muted, #bbb)" }}>Operational Clearances:</strong>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "6px" }}>
+                          {policyResult.clearances.map((c, i) => (
+                            <span
+                              key={i}
+                              style={{
+                                background: "rgba(76, 209, 55, 0.15)",
+                                border: "1px solid #4cd137",
+                                color: "#4cd137",
+                                fontSize: "0.75rem",
+                                padding: "2px 8px",
+                                borderRadius: "4px",
+                              }}
+                            >
+                              ✓ {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Duties */}
+                      <div style={{ marginBottom: "12px" }}>
+                        <strong style={{ fontSize: "0.85rem", color: "var(--muted, #bbb)" }}>Authorized Duties:</strong>
+                        <ul style={{ margin: "6px 0 0 16px", padding: 0, fontSize: "0.85rem", color: "#ccc" }}>
+                          {policyResult.operationalDuties.map((d, i) => (
+                            <li key={i}>{d}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {policyResult.notes && (
+                        <div style={{ fontSize: "0.8rem", color: "var(--muted, #888)", fontStyle: "italic", marginBottom: "16px" }}>
+                          Note: {policyResult.notes}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Shift Compensation Calculator */}
+                  <div style={{ background: "rgba(0,0,0,0.3)", padding: "16px", borderRadius: "8px", border: "1px solid rgba(212,175,55,0.3)" }}>
+                    <h4 style={{ margin: "0 0 10px 0", color: "var(--gold, #d4af37)" }}>
+                      Live Shift Compensation Calculator (Strategy Calculation)
+                    </h4>
+                    <form onSubmit={handleRecalculateComp} style={{ display: "flex", gap: "12px", alignItems: "flex-end", flexWrap: "wrap" }}>
+                      <div style={{ flex: 1, minWidth: "120px" }}>
+                        <label style={{ fontSize: "0.8rem", display: "block", marginBottom: "4px" }}>Regular Hours</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="80"
+                          value={calcRegularHours}
+                          onChange={(e) => setCalcRegularHours(Number(e.target.value))}
+                          style={{ width: "100%", padding: "6px 8px" }}
+                          disabled={policyLoading}
+                        />
+                      </div>
+                      <div style={{ flex: 1, minWidth: "120px" }}>
+                        <label style={{ fontSize: "0.8rem", display: "block", marginBottom: "4px" }}>Overtime Hours</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="40"
+                          value={calcOvertimeHours}
+                          onChange={(e) => setCalcOvertimeHours(Number(e.target.value))}
+                          style={{ width: "100%", padding: "6px 8px" }}
+                          disabled={policyLoading}
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="btn sm"
+                        disabled={policyLoading}
+                        style={{ height: "36px", background: "var(--gold, #d4af37)", color: "#000" }}
+                      >
+                        {policyLoading ? "Calculating..." : "Calculate Shift Pay"}
+                      </button>
+                    </form>
+
+                    {compensationResult && (
+                      <div style={{ marginTop: "14px", borderTop: "1px dashed rgba(255,255,255,0.15)", paddingTop: "12px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                          <span style={{ fontSize: "0.85rem", color: "var(--muted, #aaa)" }}>Regular Earnings:</span>
+                          <strong>{compensationResult.regularEarnings.toFixed(2)} LKR</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                          <span style={{ fontSize: "0.85rem", color: "var(--muted, #aaa)" }}>Overtime ({compensationResult.overtimeMultiplier}x):</span>
+                          <strong>{compensationResult.overtimeEarnings.toFixed(2)} LKR</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                          <span style={{ fontSize: "0.85rem", color: "var(--muted, #aaa)" }}>Role Allowance:</span>
+                          <strong>{compensationResult.specialAllowance.toFixed(2)} LKR</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(212,175,55,0.4)", paddingTop: "8px", marginTop: "8px" }}>
+                          <span style={{ fontSize: "1rem", color: "var(--gold, #d4af37)", fontWeight: "bold" }}>Total Compensation:</span>
+                          <span style={{ fontSize: "1.2rem", color: "var(--gold, #d4af37)", fontWeight: "bold" }}>
+                            {compensationResult.totalCompensation.toFixed(2)} LKR
+                          </span>
+                        </div>
+                        {compensationResult.formulaBreakdown && (
+                          <div style={{ fontSize: "0.75rem", color: "var(--muted, #888)", marginTop: "6px", fontFamily: "monospace" }}>
+                            {compensationResult.formulaBreakdown}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ marginTop: "14px", textAlign: "right" }}>
+                    <button type="button" className="btn secondary sm" onClick={handleClosePolicyModal}>
+                      Close
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>
