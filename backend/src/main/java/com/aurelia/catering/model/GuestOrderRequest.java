@@ -7,6 +7,9 @@ import java.util.List;
 /**
  * Data Transfer Object for guest catering booking submissions.
  * Combines Customer, Order, Event, and selected Menu Item data into a single request.
+ *
+ * DTO pattern: carries the whole booking form in one object, so the public page makes a single
+ * API call and OrderDao.createGuestOrder saves everything in one transaction.
  */
 public class GuestOrderRequest {
 
@@ -27,6 +30,7 @@ public class GuestOrderRequest {
     private String startTime;
 
     // Selected menu items (for Order_Menu_Item)
+    // OOP - composition: a booking "has a" list of items; the list always starts empty, never null
     private List<GuestOrderItem> menuItems = new ArrayList<>();
 
     public GuestOrderRequest() {
@@ -132,12 +136,14 @@ public class GuestOrderRequest {
         return menuItems;
     }
 
+    // OOP - encapsulation: the setter protects the object's state by replacing null with an empty list
     public void setMenuItems(List<GuestOrderItem> menuItems) {
         this.menuItems = menuItems != null ? menuItems : new ArrayList<>();
     }
 
     /**
      * Inner helper class representing a single menu item selection in the guest booking.
+     * OOP - static nested class: it only exists to serve GuestOrderRequest, so it is kept inside it.
      */
     public static class GuestOrderItem {
         private Integer menuItemId;

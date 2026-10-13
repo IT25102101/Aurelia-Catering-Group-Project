@@ -3,7 +3,7 @@ package com.aurelia.catering.model;
 import java.time.LocalDateTime;
 
 /**
- * Model representing a staff review for an order from table Order_Review in AureliaCatering2.
+ * Model representing a staff review (verify, approve or reject) of an order from table Order_Review in AureliaCatering2.
  * Columns: OrderReviewID, OrderID, StaffID, ReviewDate, ReviewStatus, Comments
  */
 public class OrderReview {
@@ -15,6 +15,7 @@ public class OrderReview {
     private String reviewStatus;
     private String comments;
 
+    // OOP - encapsulation (private fields + getters/setters) and constructor overloading (empty + full)
     public OrderReview() {
     }
 

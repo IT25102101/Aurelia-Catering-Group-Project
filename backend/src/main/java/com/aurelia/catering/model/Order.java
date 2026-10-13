@@ -5,6 +5,10 @@ import java.time.LocalDate;
 /**
  * Model representing an order from the ORDER table in AureliaCatering2.
  * Columns: OrderID, CustomerID, PackageID, OrderDate, Status, SpecialRequests, PreparedByStaffID, CustomerConfirmedDate
+ *
+ * OOP: a plain model class with private fields (encapsulation) and public getters/setters.
+ * Jackson turns it to and from JSON, so the same object travels between React, controller and DAO.
+ * Wrapper types (Integer, LocalDate) are used so optional columns can be null.
  */
 public class Order {
 
@@ -17,6 +21,7 @@ public class Order {
     private Integer preparedByStaffId;
     private LocalDate customerConfirmedDate;
 
+    // OOP - constructor overloading: the empty one is used by Jackson/DAO, the full one builds an order in one call
     public Order() {
     }
 
@@ -32,7 +37,7 @@ public class Order {
         this.customerConfirmedDate = customerConfirmedDate;
     }
 
-    // Standard getters and setters
+    // OOP - encapsulation: fields are private and only reachable through these getters/setters
     public Integer getOrderId() {
         return orderId;
     }
@@ -41,6 +46,7 @@ public class Order {
         this.orderId = orderId;
     }
 
+    // short alias so the frontend can read the order id as "id" as well as "orderId"
     public Integer getId() {
         return orderId;
     }

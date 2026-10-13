@@ -6,6 +6,9 @@ import java.util.List;
 /**
  * DTO representing the total inventory readiness check for an order.
  * If canConfirm is false, the manager must not confirm the order.
+ *
+ * OOP - composition: one result "has many" InventoryCheckItem objects (one per ingredient),
+ * so the overall answer and the per-ingredient details travel together. Fields are private (encapsulation).
  */
 public class InventoryCheckResult {
 

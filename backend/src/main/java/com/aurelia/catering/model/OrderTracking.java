@@ -9,6 +9,9 @@ import java.time.LocalDate;
  * - NO customer name, email, or contact information is included.
  * - Payment fields are included as placeholders (Phase 2) without fabricated data.
  * - Only operational event and package details are exposed.
+ *
+ * OOP - abstraction / data hiding: the public page only sees this small class, never the full
+ * Order or Customer objects, so private details cannot leak. Fields are private (encapsulation).
  */
 public class OrderTracking {
 
@@ -23,6 +26,7 @@ public class OrderTracking {
     private Double amountPaid;
     private Double remainingBalance;
 
+    // OOP - constructor overloading; both set safe defaults for the payment placeholders
     public OrderTracking() {
         this.paymentStatus = "Not Available";
         this.totalAmount = null;

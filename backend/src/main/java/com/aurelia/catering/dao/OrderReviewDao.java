@@ -13,6 +13,9 @@ import java.util.List;
  * Data Access Object for OrderReview.
  * Matches table Order_Review in AureliaCatering2:
  * Columns: OrderReviewID, OrderID, StaffID, ReviewDate, ReviewStatus, Comments
+ *
+ * DAO pattern: all SQL for staff order reviews lives here (PreparedStatement + pooled connection).
+ * New ids are generated as MAX(OrderReviewID) + 1.
  */
 @Repository
 public class OrderReviewDao {
@@ -111,6 +114,8 @@ public class OrderReviewDao {
                 LocalDateTime reviewDate = review.getReviewDate() != null ? review.getReviewDate() : LocalDateTime.now();
                 stmt.setTimestamp(4, Timestamp.valueOf(reviewDate));
 
+                // Validation/defaults: date defaults to now. The database CHECK constraint only accepts
+                // Approved, Rejected or Changes Requested.
                 String status = review.getReviewStatus() != null && !review.getReviewStatus().trim().isEmpty() ? review.getReviewStatus() : "Approved";
                 stmt.setString(5, status);
                 stmt.setString(6, review.getComments());
@@ -120,6 +125,7 @@ public class OrderReviewDao {
 
             review.setOrderReviewId(newId);
         } catch (SQLException e) {
+            // Exception handling: a rejected value (e.g. unknown StaffID -> foreign key error) surfaces here
             throw new RuntimeException("Error creating order review: " + e.getMessage(), e);
         }
         return review;

@@ -206,3 +206,6 @@ nbproject/load-impl.xml
 # Maven build directory
 target/
 *.class
+# Native JDBC Windows-auth DLL (download per backend/lib/README.md)
+backend/lib/*.dll
+/mssql-jdbc_auth-*.dll

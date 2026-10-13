@@ -14,6 +14,9 @@ import java.util.List;
 /**
  * Data Access Object for Order_Menu_Item table in AureliaCatering2.
  * Columns: OrderID, MenuItemID, Quantity
+ *
+ * DAO pattern: all SQL for the dishes of an order lives here. The read query LEFT JOINs MenuItem
+ * so the frontend gets each dish's name, price and category in one call.
  */
 @Repository
 public class OrderMenuItemDao {
@@ -54,10 +57,12 @@ public class OrderMenuItemDao {
 
             stmt.setInt(1, item.getOrderId());
             stmt.setInt(2, item.getMenuItemId());
+            // Validation: quantity must be above 0 (also enforced by CHECK Quantity > 0 in the database)
             stmt.setInt(3, item.getQuantity() != null && item.getQuantity() > 0 ? item.getQuantity() : 1);
             stmt.executeUpdate();
 
         } catch (SQLException e) {
+            // Exception handling: adding the same dish twice breaks the (OrderID, MenuItemID) primary key and lands here
             throw new RuntimeException("Error adding menu item to order: " + e.getMessage(), e);
         }
         return item;

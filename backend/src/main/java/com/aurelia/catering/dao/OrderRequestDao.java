@@ -13,6 +13,9 @@ import java.util.List;
  * Data Access Object for OrderRequest.
  * Matches table Order_Request in AureliaCatering2:
  * Columns: RequestID, OrderID, RequestType, RequestDate, Reason, RequestedEventDate, RequestStatus, ReviewedByStaffID, ReviewDate, Response
+ *
+ * DAO pattern: all SQL for customer requests lives here (PreparedStatement + pooled connection).
+ * New ids are generated as MAX(RequestID) + 1.
  */
 @Repository
 public class OrderRequestDao {
@@ -106,6 +109,8 @@ public class OrderRequestDao {
             try (PreparedStatement stmt = conn.prepareStatement(insertSql)) {
                 stmt.setInt(1, newId);
                 stmt.setInt(2, request.getOrderId());
+                // Validation/defaults: type falls back to Cancellation, status to Pending. The database
+                // CHECK constraints only accept Cancellation/Rescheduling and Pending/Approved/Rejected.
                 stmt.setString(3, request.getRequestType() != null ? request.getRequestType() : "Cancellation");
 
                 LocalDateTime reqDate = request.getRequestDate() != null ? request.getRequestDate() : LocalDateTime.now();
@@ -141,6 +146,7 @@ public class OrderRequestDao {
 
             request.setRequestId(newId);
         } catch (SQLException e) {
+            // Exception handling: a rejected value (e.g. unknown OrderID -> foreign key error) surfaces here
             throw new RuntimeException("Error creating order request: " + e.getMessage(), e);
         }
         return request;
