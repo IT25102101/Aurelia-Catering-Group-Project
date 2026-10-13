@@ -16,6 +16,7 @@ public class OrderMenuItem {
     private Double price;
     private String category;
 
+    // OOP - encapsulation (private fields + getters/setters) and constructor overloading (empty + full)
     public OrderMenuItem() {
     }
 

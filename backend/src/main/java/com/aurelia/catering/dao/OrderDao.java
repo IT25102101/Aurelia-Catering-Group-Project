@@ -19,6 +19,27 @@ import java.util.Map;
  * Data Access Object for Order.
  * Matches table [Order] in AureliaCatering2:
  * Columns: OrderID, CustomerID, PackageID, OrderDate, Status, SpecialRequests, PreparedByStaffID, CustomerConfirmedDate
+ *
+ * Design pattern: DAO (Data Access Object). All SQL for orders lives here, so controllers stay
+ * free of database code and the database can change without touching them.
+ * DB connectivity: every method gets a pooled connection from DBConnection and uses
+ * PreparedStatement (parameterised SQL, which prevents SQL injection).
+ *
+ * OOP concepts here:
+ * - Abstraction: callers use getOrderById(...) etc. and never see JDBC or SQL.
+ * - Encapsulation: helpers such as mapRow are private; only the intended methods are public.
+ * - Single responsibility: this class does order data access only (menu items, requests, reviews
+ *   and history each have their own DAO).
+ * - Exception handling: SQL errors are caught and rethrown as RuntimeException with a clear message.
+ *   try-with-resources always closes the connection, statement and result set (even after an error).
+ *   Business-rule problems (e.g. not enough stock) use IllegalStateException, which the controller
+ *   maps to 409 Conflict. In transactions, a failure triggers rollback() so no half-saved data remains.
+ * - Validation: the controller rejects bad input first. Here we also apply safe defaults
+ *   (today's date, status "Pending Verification") and the database enforces its own CHECK,
+ *   FOREIGN KEY and UNIQUE rules, so invalid data is stopped at every layer.
+ *
+ * APIs used: JDBC (java.sql: Connection, PreparedStatement, CallableStatement, ResultSet) to talk to
+ * SQL Server through the Microsoft JDBC driver, and java.time.LocalDate for dates.
  */
 @Repository
 public class OrderDao {
@@ -37,11 +58,13 @@ public class OrderDao {
             }
 
         } catch (SQLException e) {
+            // same pattern in every method: wrap the SQL error with context and keep the original cause
             throw new RuntimeException("Error fetching all orders: " + e.getMessage(), e);
         }
         return list;
     }
 
+    // short-name aliases (getAll, getById, create, update, delete) that simply call the full-name methods
     public List<Order> getAll() {
         return getAllOrders();
     }
@@ -92,6 +115,7 @@ public class OrderDao {
     }
 
     // ---------- CREATE ----------
+    // Inserts one order. Defaults: today's date and status "Pending Verification".
     public Order createOrder(Order order) {
         int newId = 1;
         String idSql = "SELECT ISNULL(MAX(OrderID), 0) + 1 FROM [Order]";
@@ -142,7 +166,7 @@ public class OrderDao {
 
             order.setOrderId(newId);
 
-            // Ensure Customer_Account exists for customerId
+            // Make sure the customer has a portal login (initial password = their phone number, stored hashed)
             if (order.getCustomerId() != null && order.getCustomerId() > 0) {
                 try {
                     boolean accExists = false;
@@ -179,7 +203,8 @@ public class OrderDao {
                         }
                     }
                 } catch (SQLException ex) {
-                    // Non-fatal auto-account creation check
+                    // Exception handling: the order is already saved, so a failure creating the optional
+                    // portal account is ignored on purpose instead of failing the whole order
                 }
             }
         } catch (SQLException e) {
@@ -193,13 +218,15 @@ public class OrderDao {
     }
 
     // ---------- ATOMIC GUEST ORDER CREATION (CUSTOMER + ORDER + EVENT + AUTO CUSTOMER_ACCOUNT) ----------
+    // Public booking flow. Everything runs in ONE transaction: if any step fails we roll back,
+    // so we never end up with half a booking (e.g. an order with no event).
     public Map<String, Object> createGuestOrder(GuestOrderRequest req) {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false); // Begin Transaction
 
-            // 1. Find or create Customer
+            // 1. Find or create Customer (match by email first, then phone, so repeat guests are not duplicated)
             Integer customerId = null;
             String email = req.getEmail() != null ? req.getEmail().trim() : "";
             String phone = req.getPhone() != null ? req.getPhone().trim() : "";
@@ -233,7 +260,8 @@ public class OrderDao {
             }
 
             if (customerId == null) {
-                // Phone number is required for new customer auto-account password generation
+                // Validation (business rule): a new customer needs a phone number, because it becomes the
+                // initial password. Throwing here triggers the rollback in the catch block below.
                 if (phone.isEmpty() || "N/A".equalsIgnoreCase(phone)) {
                     throw new SQLException("Customer phone number is required to automatically create customer portal account.");
                 }
@@ -307,7 +335,7 @@ public class OrderDao {
                 isNewAccountCreated = true;
             }
 
-            // 2. Create Order
+            // 2. Create Order (always starts as "Pending Verification" for staff to review)
             int newOrderId;
             try (PreparedStatement sId = conn.prepareStatement("SELECT ISNULL(MAX(OrderID), 0) + 1 FROM [Order]");
                  ResultSet rs = sId.executeQuery()) {
@@ -330,7 +358,7 @@ public class OrderDao {
                 s.executeUpdate();
             }
 
-            // 3. Create Event
+            // 3. Create Event (date, venue, guest count) linked to the order - integrates with Event Management
             int newEventId;
             try (PreparedStatement sId = conn.prepareStatement("SELECT ISNULL(MAX(EventID), 0) + 1 FROM [Event]");
                  ResultSet rs = sId.executeQuery()) {
@@ -360,7 +388,7 @@ public class OrderDao {
                 s.executeUpdate();
             }
 
-            // 4. Create Order Menu Items if provided
+            // 4. Save the selected dishes (links to Menu Management); quantity defaults to 1
             if (req.getMenuItems() != null && !req.getMenuItems().isEmpty()) {
                 String insertItemSql = "INSERT INTO Order_Menu_Item (OrderID, MenuItemID, Quantity) VALUES (?, ?, ?)";
                 try (PreparedStatement sItem = conn.prepareStatement(insertItemSql)) {
@@ -375,8 +403,9 @@ public class OrderDao {
                 }
             }
 
-            conn.commit(); // Commit transaction!
+            conn.commit(); // all four steps succeeded, so save them together
 
+            // Reply sent back to the booking page (order id, event id and login details for new accounts)
             Map<String, Object> result = new HashMap<>();
             result.put("orderId", newOrderId);
             result.put("id", newOrderId); // compatibility alias
@@ -395,13 +424,14 @@ public class OrderDao {
         } catch (SQLException e) {
             if (conn != null) {
                 try {
-                    conn.rollback();
+                    conn.rollback(); // undo everything from this booking
                 } catch (SQLException rbEx) {
                     // Suppress rollback exception
                 }
             }
             throw new RuntimeException("Transaction failed while creating guest order: " + e.getMessage(), e);
         } finally {
+            // finally always runs: the connection goes back to the pool whether the booking worked or not
             if (conn != null) {
                 try {
                     conn.close();
@@ -413,6 +443,7 @@ public class OrderDao {
     }
 
     // ---------- UPDATE ----------
+    // Updates all editable fields. Switching to "Preparing" first runs the stock check/deduction.
     public Order updateOrder(Order order) {
         if (order.getStatus() != null && "Preparing".equals(normalizeOrderStatus(order.getStatus()))) {
             Order current = getOrderById(order.getOrderId());
@@ -466,7 +497,9 @@ public class OrderDao {
     }
 
     // ---------- UPDATE STATUS ----------
+    // Changes only the status column. The input is cleaned by normalizeOrderStatus first.
     public void updateOrderStatus(int orderId, String rawStatus) {
+        // Validation: never write an empty status
         if (rawStatus == null || rawStatus.trim().isEmpty()) {
             throw new IllegalArgumentException("Status cannot be empty.");
         }
@@ -487,6 +520,7 @@ public class OrderDao {
             stmt.setString(1, status);
             stmt.setInt(2, orderId);
             int rows = stmt.executeUpdate();
+            // 0 rows changed means no order has this id
             if (rows == 0) {
                 throw new IllegalArgumentException("Order #" + orderId + " not found.");
             }
@@ -497,8 +531,14 @@ public class OrderDao {
     }
 
     // ---------- INVENTORY CHECK / CONFIRM (Phase 3) ----------
+    // Integration with Inventory & Recipes: the DB function dbo.GetInventoryNeedForOrder works out the
+    // ingredients needed (quantity x recipe), and the stored procedure dbo.DeductInventoryForOrder
+    // reduces the stock.
 
     /**
+     * OOP - method overloading: checkInventory(orderId) is the public version and opens its own connection;
+     * the private checkInventory(conn, orderId) reuses a connection that is already inside a transaction.
+     *
      * Read-only stock check: for every ingredient used by the order's menu items
      * (order quantity x recipe amount per serving), compares the need with the stock level.
      * Returns null when the order does not exist.
@@ -605,6 +645,7 @@ public class OrderDao {
 
             InventoryCheckResult result = checkInventory(conn, orderId);
 
+            // Validation: finished or rejected orders can no longer be confirmed
             if ("Rejected".equals(status) || "Cancelled".equals(status) || "Delivered".equals(status)) {
                 conn.rollback();
                 result.setCanConfirm(false);
@@ -645,6 +686,9 @@ public class OrderDao {
                     // nothing more to do
                 }
             }
+            // Exception handling: 50062 is our own error code, raised by the stored procedure with THROW
+            // when stock ran out between the check and the deduction. We turn it into a normal
+            // "cannot confirm" answer instead of a server error.
             // 50062 = not enough stock (raised by the stored procedure when stock changed meanwhile)
             if (e.getErrorCode() == 50062) {
                 InventoryCheckResult failed = new InventoryCheckResult(orderId, null, null, false, e.getMessage());
@@ -689,6 +733,7 @@ public class OrderDao {
                 }
             }
 
+            // Validation: finished or rejected orders cannot go back into preparation
             if ("Rejected".equals(status) || "Cancelled".equals(status) || "Delivered".equals(status)) {
                 conn.rollback();
                 throw new IllegalStateException("Order #" + orderId + " is " + status + " and cannot be prepared.");
@@ -736,6 +781,9 @@ public class OrderDao {
         }
     }
 
+    // Validation helper: maps any spelling (e.g. "confirmed", "ready", "cooking") to one of the
+    // official status names, so the database only ever holds consistent values.
+    // OOP - static method: it needs no OrderDao state, so the controller can call it directly.
     public static String normalizeOrderStatus(String raw) {
         if (raw == null) return "Pending Verification";
         String s = raw.trim().toLowerCase().replace("_", " ").replace("-", " ");
@@ -754,6 +802,7 @@ public class OrderDao {
     }
 
     // ---------- DELETE ----------
+    // Child rows are deleted first (children before parent) so foreign key constraints are not violated.
     public void deleteOrder(int orderId) {
         try (Connection conn = DBConnection.getConnection()) {
             // Remove linked history, event, reviews, requests, quotations, and order menu items first to satisfy foreign keys
@@ -812,7 +861,7 @@ public class OrderDao {
         deleteOrder(id);
     }
 
-    /** Helper method to map ResultSet row to Order object */
+    /** Helper method to map ResultSet row to Order object. Private (encapsulation) and reused by every read method. */
     private Order mapRow(ResultSet rs) throws SQLException {
         Order order = new Order();
         order.setOrderId(rs.getInt("OrderID"));

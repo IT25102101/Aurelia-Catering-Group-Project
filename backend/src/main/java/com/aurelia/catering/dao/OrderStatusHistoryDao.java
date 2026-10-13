@@ -13,6 +13,9 @@ import java.util.List;
  * Data Access Object for OrderStatusHistory.
  * Matches table Order_Status_History in AureliaCatering2:
  * Columns: StatusHistoryID, OrderID, Status, ChangedDate, ChangedByStaffID
+ *
+ * DAO pattern: all SQL for the status audit trail lives here (PreparedStatement + pooled connection).
+ * New ids are generated as MAX(StatusHistoryID) + 1.
  */
 @Repository
 public class OrderStatusHistoryDao {
@@ -108,6 +111,7 @@ public class OrderStatusHistoryDao {
                 stmt.setInt(2, history.getOrderId());
                 stmt.setString(3, history.getStatus());
 
+                // Validation/defaults: if no date is given, the time of the change is recorded automatically
                 LocalDateTime changedDate = history.getChangedDate() != null ? history.getChangedDate() : LocalDateTime.now();
                 stmt.setTimestamp(4, Timestamp.valueOf(changedDate));
 
@@ -122,6 +126,7 @@ public class OrderStatusHistoryDao {
 
             history.setStatusHistoryId(newId);
         } catch (SQLException e) {
+            // Exception handling: a rejected value (e.g. unknown OrderID -> foreign key error) surfaces here
             throw new RuntimeException("Error creating order status history: " + e.getMessage(), e);
         }
         return history;

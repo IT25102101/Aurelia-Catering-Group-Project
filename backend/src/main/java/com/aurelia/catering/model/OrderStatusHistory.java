@@ -3,7 +3,7 @@ package com.aurelia.catering.model;
 import java.time.LocalDateTime;
 
 /**
- * Model representing an order status change from table Order_Status_History in AureliaCatering2.
+ * Model representing one status change of an order (audit trail) from table Order_Status_History in AureliaCatering2.
  * Columns: StatusHistoryID, OrderID, Status, ChangedDate, ChangedByStaffID
  */
 public class OrderStatusHistory {
@@ -14,6 +14,7 @@ public class OrderStatusHistory {
     private LocalDateTime changedDate;
     private Integer changedByStaffId;
 
+    // OOP - encapsulation (private fields + getters/setters) and constructor overloading (empty + full)
     public OrderStatusHistory() {
     }
 

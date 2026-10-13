@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Model representing a customer request for an order from table Order_Request in AureliaCatering2.
+ * Model representing a customer request for an order (cancellation or rescheduling) from table Order_Request in AureliaCatering2.
  * Columns: RequestID, OrderID, RequestType, RequestDate, Reason, RequestedEventDate, RequestStatus, ReviewedByStaffID, ReviewDate, Response
  */
 public class OrderRequest {
@@ -20,6 +20,7 @@ public class OrderRequest {
     private LocalDateTime reviewDate;
     private String response;
 
+    // OOP - encapsulation (private fields + getters/setters) and constructor overloading (empty + full)
     public OrderRequest() {
     }
 
