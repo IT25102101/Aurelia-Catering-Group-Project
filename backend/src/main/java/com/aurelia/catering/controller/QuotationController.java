@@ -3,7 +3,6 @@ package com.aurelia.catering.controller;
 import com.aurelia.catering.dao.QuotationDao;
 import com.aurelia.catering.model.Quotation;
 import com.aurelia.catering.model.QuotationRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +16,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/quotations")
 public class QuotationController {
+    private final QuotationDao quotationDao;
 
-    @Autowired
-    private QuotationDao quotationDao;
+    public QuotationController(QuotationDao quotationDao) {
+        this.quotationDao = quotationDao;
+    }
 
     // GET /api/quotations
     @GetMapping

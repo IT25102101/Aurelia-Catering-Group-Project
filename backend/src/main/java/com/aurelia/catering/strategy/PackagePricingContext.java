@@ -2,7 +2,6 @@ package com.aurelia.catering.strategy;
 
 import com.aurelia.catering.model.CateringPackage;
 import com.aurelia.catering.model.PackageMenuItem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -22,7 +21,6 @@ public class PackagePricingContext {
     private final Map<String, PackagePricingStrategy> strategies = new HashMap<>();
     private PackagePricingStrategy currentStrategy;
 
-    @Autowired
     public PackagePricingContext(List<PackagePricingStrategy> strategyList) {
         if (strategyList != null) {
             for (PackagePricingStrategy strat : strategyList) {

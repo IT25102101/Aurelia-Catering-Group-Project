@@ -2,7 +2,6 @@ package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.CustomerDao;
 import com.aurelia.catering.model.Customer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +14,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
+    private final CustomerDao customerDao;
 
-    @Autowired
-    private CustomerDao customerDao;
+    public CustomerController(CustomerDao customerDao) {
+        this.customerDao = customerDao;
+    }
 
     // GET /api/customers
     @GetMapping

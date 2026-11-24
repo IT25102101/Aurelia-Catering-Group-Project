@@ -16,8 +16,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig {
 
-    @Value("${aurelia.cors.allowed-origin-patterns:http://localhost:*,http://127.0.0.1:*}")
-    private String[] allowedOriginPatterns;
+    private final @NonNull String[] allowedOriginPatterns;
+
+    public CorsConfig(
+            @Value("${aurelia.cors.allowed-origin-patterns:http://localhost:*,http://127.0.0.1:*}")
+            @NonNull String[] allowedOriginPatterns) {
+        this.allowedOriginPatterns = allowedOriginPatterns != null
+                ? allowedOriginPatterns
+                : new String[0];
+    }
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {

@@ -5,7 +5,6 @@ import com.aurelia.catering.dao.StaffAccountDao;
 import com.aurelia.catering.model.CustomerAccount;
 import com.aurelia.catering.model.StaffAccount;
 import com.aurelia.catering.util.PasswordUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,12 +20,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    private final StaffAccountDao staffAccountDao;
+    private final CustomerAccountDao customerAccountDao;
 
-    @Autowired
-    private StaffAccountDao staffAccountDao;
-
-    @Autowired
-    private CustomerAccountDao customerAccountDao;
+    public AuthController(StaffAccountDao staffAccountDao, CustomerAccountDao customerAccountDao) {
+        this.staffAccountDao = staffAccountDao;
+        this.customerAccountDao = customerAccountDao;
+    }
 
     /**
      * Authenticates a user against either STAFF_ACCOUNT or CUSTOMER_ACCOUNT.

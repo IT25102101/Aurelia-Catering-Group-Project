@@ -2,7 +2,6 @@ package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.QuotationItemDao;
 import com.aurelia.catering.model.QuotationItem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,12 +14,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/quotation-items")
 public class QuotationItemController {
+    private final QuotationItemDao quotationItemDao;
+    private final com.aurelia.catering.dao.QuotationDao quotationDao;
 
-    @Autowired
-    private QuotationItemDao quotationItemDao;
-
-    @Autowired
-    private com.aurelia.catering.dao.QuotationDao quotationDao;
+    public QuotationItemController(QuotationItemDao quotationItemDao,
+                                   com.aurelia.catering.dao.QuotationDao quotationDao) {
+        this.quotationItemDao = quotationItemDao;
+        this.quotationDao = quotationDao;
+    }
 
     // GET /api/quotation-items
     @GetMapping

@@ -2,7 +2,6 @@ package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.DeliveryDao;
 import com.aurelia.catering.model.Delivery;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,12 +30,11 @@ import java.util.List;
 @RequestMapping("/api/deliveries") // every method below is reachable under this
                                  // base URL, e.g. GET /api/deliveries
 public class DeliveryController {
+    private final DeliveryDao deliveryDao;
 
-    // @Autowired asks Spring to hand us the one DeliveryDao object it
-    // already created (Spring "wires" it in automatically) — we never
-    // write "new DeliveryDao()" ourselves.
-    @Autowired
-    private DeliveryDao deliveryDao;
+    public DeliveryController(DeliveryDao deliveryDao) {
+        this.deliveryDao = deliveryDao;
+    }
 
     // ---------- 2. READ (all) ----------
     // @GetMapping with no path = handles GET /api/deliveries

@@ -3,7 +3,6 @@ package com.aurelia.catering.controller;
 import com.aurelia.catering.model.CateringPackage;
 import com.aurelia.catering.service.CateringPackageService;
 import com.aurelia.catering.strategy.PricingBreakdown;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +20,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/catering-packages")
 public class CateringPackageController {
+    private final CateringPackageService cateringPackageService;
 
-    @Autowired
-    private CateringPackageService cateringPackageService;
+    public CateringPackageController(CateringPackageService cateringPackageService) {
+        this.cateringPackageService = cateringPackageService;
+    }
 
     // GET /api/catering-packages
     @GetMapping

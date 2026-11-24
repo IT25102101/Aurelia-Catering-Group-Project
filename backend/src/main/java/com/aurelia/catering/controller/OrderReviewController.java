@@ -2,7 +2,6 @@ package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.OrderReviewDao;
 import com.aurelia.catering.model.OrderReview;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,9 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/order-reviews")
 public class OrderReviewController {
+    private final OrderReviewDao orderReviewDao;
 
-    @Autowired
-    private OrderReviewDao orderReviewDao;
+    public OrderReviewController(OrderReviewDao orderReviewDao) {
+        this.orderReviewDao = orderReviewDao;
+    }
 
     // GET /api/order-reviews - READ: all reviews
     @GetMapping

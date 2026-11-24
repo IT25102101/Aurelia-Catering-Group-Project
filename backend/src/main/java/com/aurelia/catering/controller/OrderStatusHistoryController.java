@@ -2,7 +2,7 @@ package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.OrderStatusHistoryDao;
 import com.aurelia.catering.model.OrderStatusHistory;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +17,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/order-status-history")
 public class OrderStatusHistoryController {
+    private final OrderStatusHistoryDao orderStatusHistoryDao;
 
-    @Autowired
-    private OrderStatusHistoryDao orderStatusHistoryDao;
+    public OrderStatusHistoryController(OrderStatusHistoryDao orderStatusHistoryDao) {
+        this.orderStatusHistoryDao = orderStatusHistoryDao;
+    }
 
     // GET /api/order-status-history - READ: all history entries
     @GetMapping

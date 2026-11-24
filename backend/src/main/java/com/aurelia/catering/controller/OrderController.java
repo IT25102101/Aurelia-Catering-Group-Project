@@ -4,7 +4,6 @@ import com.aurelia.catering.dao.OrderDao;
 import com.aurelia.catering.model.GuestOrderRequest;
 import com.aurelia.catering.model.InventoryCheckResult;
 import com.aurelia.catering.model.Order;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,11 +28,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
+    private final OrderDao orderDao;
 
-    // OOP - abstraction + dependency injection: the controller only knows what OrderDao offers,
-    // not how it works. Spring supplies the object, so the two classes stay loosely coupled.
-    @Autowired
-    private OrderDao orderDao;
+    public OrderController(OrderDao orderDao) {
+        this.orderDao = orderDao;
+    }
 
     // GET /api/orders - READ: list every order
     @GetMapping

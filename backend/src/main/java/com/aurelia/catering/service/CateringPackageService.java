@@ -3,12 +3,10 @@ package com.aurelia.catering.service;
 import com.aurelia.catering.dao.CateringPackageDao;
 import com.aurelia.catering.dao.PackageMenuItemDao;
 import com.aurelia.catering.factory.CateringPackageFactory;
-import com.aurelia.catering.factory.PackageType;
 import com.aurelia.catering.model.CateringPackage;
 import com.aurelia.catering.model.PackageMenuItem;
 import com.aurelia.catering.strategy.PackagePricingContext;
 import com.aurelia.catering.strategy.PricingBreakdown;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,7 +28,6 @@ public class CateringPackageService {
     private final CateringPackageFactory cateringPackageFactory;
     private final PackagePricingContext pricingContext;
 
-    @Autowired
     public CateringPackageService(
             CateringPackageDao cateringPackageDao,
             PackageMenuItemDao packageMenuItemDao,

@@ -2,7 +2,6 @@ package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.PaymentDao;
 import com.aurelia.catering.model.Payment;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +14,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
+    private final PaymentDao paymentDao;
 
-    @Autowired
-    private PaymentDao paymentDao;
+    public PaymentController(PaymentDao paymentDao) {
+        this.paymentDao = paymentDao;
+    }
 
     // GET /api/payments
     @GetMapping

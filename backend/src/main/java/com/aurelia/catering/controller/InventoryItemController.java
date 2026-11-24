@@ -2,7 +2,6 @@ package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.InventoryItemDao;
 import com.aurelia.catering.model.InventoryItem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +14,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/inventory-items")
 public class InventoryItemController {
+    private final InventoryItemDao inventoryItemDao;
 
-    @Autowired
-    private InventoryItemDao inventoryItemDao;
+    public InventoryItemController(InventoryItemDao inventoryItemDao) {
+        this.inventoryItemDao = inventoryItemDao;
+    }
 
     // GET /api/inventory-items
     @GetMapping

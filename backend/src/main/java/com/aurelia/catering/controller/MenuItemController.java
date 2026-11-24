@@ -2,7 +2,6 @@ package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.MenuItemDao;
 import com.aurelia.catering.model.MenuItem;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +14,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/menu-items")
 public class MenuItemController {
+    private final MenuItemDao menuItemDao;
 
-    @Autowired
-    private MenuItemDao menuItemDao;
+    public MenuItemController(MenuItemDao menuItemDao) {
+        this.menuItemDao = menuItemDao;
+    }
 
     // GET /api/menu-items
     @GetMapping

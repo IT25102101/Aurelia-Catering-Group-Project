@@ -2,7 +2,6 @@ package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.EventDao;
 import com.aurelia.catering.model.Event;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +14,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
+    private final EventDao eventDao;
 
-    @Autowired
-    private EventDao eventDao;
+    public EventController(EventDao eventDao) {
+        this.eventDao = eventDao;
+    }
 
     // GET /api/events
     @GetMapping

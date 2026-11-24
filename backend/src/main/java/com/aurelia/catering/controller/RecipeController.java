@@ -2,7 +2,7 @@ package com.aurelia.catering.controller;
 
 import com.aurelia.catering.dao.RecipeDao;
 import com.aurelia.catering.model.Recipe;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +17,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/recipes")
 public class RecipeController {
+    private final RecipeDao recipeDao;
 
-    @Autowired
-    private RecipeDao recipeDao;
+    public RecipeController(RecipeDao recipeDao) {
+        this.recipeDao = recipeDao;
+    }
 
     // GET /api/recipes/menu-item/{menuItemId}
     @GetMapping("/menu-item/{menuItemId}")
